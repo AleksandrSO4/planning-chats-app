@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Планирование поздравлений</title>
+    <style>
+        body { font-family: system-ui; padding: 16px; background: #f0f0f0; }
+        .chat-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .chat-name { font-size: 18px; font-weight: bold; }
+        .chat-date { color: #666; margin-top: 4px; }
+        .btn { display: inline-block; margin-top: 12px; background: #3390ec; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; }
+        .loading { text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <h2>🎉 Чаты для планирования</h2>
+    <div id="chats-container">Загрузка...</div>
+
+    <script>
+        // Получаем group_id из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupId = urlParams.get('group_id');
+
+        if (!groupId) {
+            document.getElementById('chats-container').innerHTML = '<p>❌ Ошибка: не передан group_id</p>';
+        } else {
+            fetch(`https://birthdaybot-production-2460.up.railway.app/planning_chats/${groupId}`)
+                .then(res => res.json())
+                .then(chats => {
+                    const container = document.getElementById('chats-container');
+                    if (chats.length === 0) {
+                        container.innerHTML = '<p>📭 Нет активных чатов. Бот создаст чат за 7 дней до дня рождения.</p>';
+                        return;
+                    }
+                    container.innerHTML = '';
+                    chats.forEach(chat => {
+                        const card = document.createElement('div');
+                        card.className = 'chat-card';
+                        card.innerHTML = `
+                            <div class="chat-name">🎂 ${chat.birthday_name}</div>
+                            <div class="chat-date">До ДР осталось: ${Math.ceil((new Date(chat.expires_at) - new Date()) / (1000*3600*24) - 2)} дней</div>
+                            <a class="btn" href="chat.html?token=${chat.chat_token}">Перейти в чат →</a>
+                        `;
+                        container.appendChild(card);
+                    });
+                })
+                .catch(err => {
+                    document.getElementById('chats-container').innerHTML = '<p>❌ Ошибка загрузки чатов</p>';
+                    console.error(err);
+                });
+        }
+    </script>
+</body>
+</html>
