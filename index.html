@@ -1,97 +1,383 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Чаты планирования</title>
     <style>
-        body { font-family: system-ui; padding: 16px; background: #f0f0f0; }
-        .group-card, .chat-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .group-name { font-size: 18px; font-weight: bold; }
-        .btn { display: inline-block; margin-top: 12px; background: #3390ec; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; }
-        .back { background: #666; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fff8f2;
+            min-height: 100vh;
+            color: #1a1a1a;
+        }
+
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #ffe0c8;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-icon {
+            width: 38px;
+            height: 38px;
+            background: #ff6b00;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .header-sub {
+            font-size: 12px;
+            color: #ff6b00;
+            margin-top: 1px;
+        }
+
+        .back-btn {
+            margin-left: auto;
+            background: #fff3ea;
+            border: 1px solid #ffd4b0;
+            color: #ff6b00;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: none;
+        }
+
+        .back-btn.visible { display: block; }
+
+        .content { padding: 20px; }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #ff6b00;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #ffe0c8;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card:active { background: #fff3ea; border-color: #ffb580; }
+
+        .card-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #fff3ea;
+            border: 1px solid #ffd4b0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .card-avatar.orange {
+            background: #ff6b00;
+            border-color: #ff6b00;
+        }
+
+        .card-info { flex: 1; min-width: 0; }
+
+        .card-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-meta {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .card-arrow {
+            font-size: 18px;
+            color: #ffb580;
+            flex-shrink: 0;
+        }
+
+        .badge {
+            background: #fff3ea;
+            color: #ff6b00;
+            border: 1px solid #ffd4b0;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .days-badge {
+            background: #fff3ea;
+            color: #ff6b00;
+            border: 1px solid #ffd4b0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            text-align: center;
+            flex-shrink: 0;
+            min-width: 52px;
+        }
+
+        .days-badge .days-num {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ff6b00;
+            line-height: 1;
+        }
+
+        .days-badge .days-label {
+            font-size: 10px;
+            color: #ff9a50;
+            margin-top: 2px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+        }
+
+        .empty-sub {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            gap: 14px;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #ffe0c8;
+            border-top-color: #ff6b00;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .error-state {
+            background: #fff3ea;
+            border: 1px solid #ffd4b0;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .error-icon { font-size: 28px; margin-bottom: 8px; }
+        .error-text { font-size: 13px; color: #cc5500; }
     </style>
 </head>
 <body>
-    <div id="content">Загрузка...</div>
 
-    <script>
-        const apiBase = 'https://birthdaybot-production-2460.up.railway.app';
+<div class="header">
+    <div class="header-icon">🎉</div>
+    <div>
+        <div class="header-title">Чаты планирования</div>
+        <div class="header-sub" id="header-sub">Выберите группу</div>
+    </div>
+    <button class="back-btn" id="back-btn" onclick="showGroups()">← Назад</button>
+</div>
 
-        // Получаем user_id из Telegram WebApp
-        let userId = null;
-        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
-            userId = Telegram.WebApp.initDataUnsafe.user.id;
-        } else {
-            // Для теста вне Telegram
-            userId = prompt('Введите ваш Telegram ID (для теста):');
-        }
+<div class="content" id="content">
+    <div class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Загрузка...</div>
+    </div>
+</div>
 
-        if (!userId) {
-            document.getElementById('content').innerHTML = '<p>❌ Не удалось определить пользователя</p>';
-        } else {
-            loadGroups();
-        }
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+    const apiBase = 'https://birthdaybot-production-2460.up.railway.app';
+    let userId = null;
+    let currentGroups = [];
 
-        async function loadGroups() {
-            document.getElementById('content').innerHTML = '<div class="loading">Загрузка групп...</div>';
-            try {
-                const res = await fetch(`${apiBase}/my_groups/${userId}`);
-                const groups = await res.json();
+    if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+        userId = Telegram.WebApp.initDataUnsafe.user.id;
+        Telegram.WebApp.expand();
+        Telegram.WebApp.setHeaderColor('#ffffff');
+    } else {
+        userId = prompt('Введите ваш Telegram ID (для теста):');
+    }
 
-                if (groups.length === 0) {
-                    document.getElementById('content').innerHTML = '<p>📭 Вы не состоите ни в одной группе, где есть бот.</p>';
-                    return;
-                }
+    if (!userId) {
+        showError('Не удалось определить пользователя');
+    } else {
+        loadGroups();
+    }
 
-                let html = '<h2>🎉 Выберите группу</h2>';
-                groups.forEach(group => {
-                    html += `
-                        <div class="group-card">
-                            <div class="group-name">👥 ${group.group_name || `Группа ${group.group_id}`}</div>
-                            <button class="btn" onclick="loadChats(${group.group_id})">📋 Чаты планирования</button>
-                        </div>
-                    `;
-                });
-                document.getElementById('content').innerHTML = html;
-            } catch (err) {
-                document.getElementById('content').innerHTML = '<p>❌ Ошибка загрузки групп</p>';
-                console.error(err);
+    function setLoading(text = 'Загрузка...') {
+        document.getElementById('content').innerHTML = `
+            <div class="loading">
+                <div class="spinner"></div>
+                <div class="loading-text">${text}</div>
+            </div>`;
+    }
+
+    function showError(msg) {
+        document.getElementById('content').innerHTML = `
+            <div class="error-state">
+                <div class="error-icon">😕</div>
+                <div class="error-text">${msg}</div>
+            </div>`;
+    }
+
+    async function loadGroups() {
+        document.getElementById('back-btn').classList.remove('visible');
+        document.getElementById('header-sub').textContent = 'Выберите группу';
+        setLoading('Загружаем группы...');
+
+        try {
+            const res = await fetch(`${apiBase}/my_groups/${userId}`);
+            const groups = await res.json();
+            currentGroups = groups;
+
+            const content = document.getElementById('content');
+
+            if (!groups.length) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <div class="empty-title">Нет групп</div>
+                        <div class="empty-sub">Вы не состоите ни в одной группе, где есть бот</div>
+                    </div>`;
+                return;
             }
-        }
 
-        async function loadChats(groupId) {
-            document.getElementById('content').innerHTML = '<div class="loading">Загрузка чатов...</div>';
-            try {
-                const res = await fetch(`${apiBase}/planning_chats/${groupId}`);
-                const chats = await res.json();
-
-                if (chats.length === 0) {
-                    document.getElementById('content').innerHTML = `
-                        <p>📭 Нет активных чатов.</p>
-                        <button class="btn back" onclick="loadGroups()">◀️ Назад к группам</button>
-                    `;
-                    return;
-                }
-
-                let html = '<h2>🎉 Активные чаты</h2>';
-                chats.forEach(chat => {
-                    html += `
-                        <div class="chat-card">
-                            <div class="group-name">🎂 ${chat.birthday_name}</div>
-                            <div>До ДР: ${Math.ceil((new Date(chat.expires_at) - new Date()) / (1000*3600*24) - 2)} дней</div>
-                            <a class="btn" href="chat.html?token=${chat.chat_token}">Перейти в чат →</a>
+            let html = `<div class="section-label">Ваши группы</div>`;
+            groups.forEach(g => {
+                const name = g.group_name || `Группа ${g.group_id}`;
+                html += `
+                    <div class="card" onclick="loadChats(${g.group_id}, '${escHtml(name)}')">
+                        <div class="card-avatar">👥</div>
+                        <div class="card-info">
+                            <div class="card-name">${escHtml(name)}</div>
+                            <div class="card-meta">Нажмите, чтобы открыть чаты</div>
                         </div>
-                    `;
-                });
-                html += `<button class="btn back" onclick="loadGroups()">◀️ Назад к группам</button>`;
-                document.getElementById('content').innerHTML = html;
-            } catch (err) {
-                document.getElementById('content').innerHTML = '<p>❌ Ошибка загрузки чатов</p>';
-                console.error(err);
-            }
+                        <div class="card-arrow">›</div>
+                    </div>`;
+            });
+            content.innerHTML = html;
+
+        } catch (e) {
+            showError('Не удалось загрузить группы. Попробуйте позже.');
+            console.error(e);
         }
-    </script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    }
+
+    async function loadChats(groupId, groupName) {
+        document.getElementById('back-btn').classList.add('visible');
+        document.getElementById('header-sub').textContent = groupName;
+        setLoading('Загружаем чаты...');
+
+        try {
+            const res = await fetch(`${apiBase}/planning_chats/${groupId}`);
+            const chats = await res.json();
+            const content = document.getElementById('content');
+
+            if (!chats.length) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎈</div>
+                        <div class="empty-title">Нет активных чатов</div>
+                        <div class="empty-sub">Чаты появятся автоматически за 7 дней до дня рождения</div>
+                    </div>`;
+                return;
+            }
+
+            let html = `<div class="section-label">Активные чаты</div>`;
+            chats.forEach(chat => {
+                const daysLeft = Math.max(0, Math.ceil((new Date(chat.expires_at) - new Date()) / 86400000) - 2);
+                html += `
+                    <a class="card" href="chat.html?token=${encodeURIComponent(chat.chat_token)}">
+                        <div class="card-avatar orange">🎂</div>
+                        <div class="card-info">
+                            <div class="card-name">${escHtml(chat.birthday_name)}</div>
+                            <div class="card-meta">Нажмите, чтобы открыть чат</div>
+                        </div>
+                        <div class="days-badge">
+                            <div class="days-num">${daysLeft}</div>
+                            <div class="days-label">дней</div>
+                        </div>
+                    </a>`;
+            });
+            content.innerHTML = html;
+
+        } catch (e) {
+            showError('Не удалось загрузить чаты. Попробуйте позже.');
+            console.error(e);
+        }
+    }
+
+    function showGroups() {
+        loadGroups();
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+</script>
 </body>
 </html>
