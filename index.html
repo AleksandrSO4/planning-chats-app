@@ -3,53 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Планирование поздравлений</title>
+    <title>Чаты планирования</title>
     <style>
         body { font-family: system-ui; padding: 16px; background: #f0f0f0; }
-        .chat-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .chat-name { font-size: 18px; font-weight: bold; }
-        .chat-date { color: #666; margin-top: 4px; }
+        .group-card, .chat-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .group-name { font-size: 18px; font-weight: bold; }
         .btn { display: inline-block; margin-top: 12px; background: #3390ec; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; }
-        .loading { text-align: center; color: #666; }
+        .back { background: #666; }
     </style>
 </head>
 <body>
-    <h2>🎉 Чаты для планирования</h2>
-    <div id="chats-container">Загрузка...</div>
+    <div id="content">Загрузка...</div>
 
     <script>
-        // Получаем group_id из URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const groupId = urlParams.get('group_id');
+        const apiBase = 'https://birthdaybot-production-2460.up.railway.app';
 
-        if (!groupId) {
-            document.getElementById('chats-container').innerHTML = '<p>❌ Ошибка: не передан group_id</p>';
+        // Получаем user_id из Telegram WebApp
+        let userId = null;
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+            userId = Telegram.WebApp.initDataUnsafe.user.id;
         } else {
-            fetch(`https://birthdaybot-production-2460.up.railway.app/planning_chats/${groupId}`)
-                .then(res => res.json())
-                .then(chats => {
-                    const container = document.getElementById('chats-container');
-                    if (chats.length === 0) {
-                        container.innerHTML = '<p>📭 Нет активных чатов. Бот создаст чат за 7 дней до дня рождения.</p>';
-                        return;
-                    }
-                    container.innerHTML = '';
-                    chats.forEach(chat => {
-                        const card = document.createElement('div');
-                        card.className = 'chat-card';
-                        card.innerHTML = `
-                            <div class="chat-name">🎂 ${chat.birthday_name}</div>
-                            <div class="chat-date">До ДР осталось: ${Math.ceil((new Date(chat.expires_at) - new Date()) / (1000*3600*24) - 2)} дней</div>
-                            <a class="btn" href="chat.html?token=${chat.chat_token}">Перейти в чат →</a>
-                        `;
-                        container.appendChild(card);
-                    });
-                })
-                .catch(err => {
-                    document.getElementById('chats-container').innerHTML = '<p>❌ Ошибка загрузки чатов</p>';
-                    console.error(err);
+            // Для теста вне Telegram
+            userId = prompt('Введите ваш Telegram ID (для теста):');
+        }
+
+        if (!userId) {
+            document.getElementById('content').innerHTML = '<p>❌ Не удалось определить пользователя</p>';
+        } else {
+            loadGroups();
+        }
+
+        async function loadGroups() {
+            document.getElementById('content').innerHTML = '<div class="loading">Загрузка групп...</div>';
+            try {
+                const res = await fetch(`${apiBase}/my_groups/${userId}`);
+                const groups = await res.json();
+
+                if (groups.length === 0) {
+                    document.getElementById('content').innerHTML = '<p>📭 Вы не состоите ни в одной группе, где есть бот.</p>';
+                    return;
+                }
+
+                let html = '<h2>🎉 Выберите группу</h2>';
+                groups.forEach(group => {
+                    html += `
+                        <div class="group-card">
+                            <div class="group-name">👥 ${group.group_name || `Группа ${group.group_id}`}</div>
+                            <button class="btn" onclick="loadChats(${group.group_id})">📋 Чаты планирования</button>
+                        </div>
+                    `;
                 });
+                document.getElementById('content').innerHTML = html;
+            } catch (err) {
+                document.getElementById('content').innerHTML = '<p>❌ Ошибка загрузки групп</p>';
+                console.error(err);
+            }
+        }
+
+        async function loadChats(groupId) {
+            document.getElementById('content').innerHTML = '<div class="loading">Загрузка чатов...</div>';
+            try {
+                const res = await fetch(`${apiBase}/planning_chats/${groupId}`);
+                const chats = await res.json();
+
+                if (chats.length === 0) {
+                    document.getElementById('content').innerHTML = `
+                        <p>📭 Нет активных чатов.</p>
+                        <button class="btn back" onclick="loadGroups()">◀️ Назад к группам</button>
+                    `;
+                    return;
+                }
+
+                let html = '<h2>🎉 Активные чаты</h2>';
+                chats.forEach(chat => {
+                    html += `
+                        <div class="chat-card">
+                            <div class="group-name">🎂 ${chat.birthday_name}</div>
+                            <div>До ДР: ${Math.ceil((new Date(chat.expires_at) - new Date()) / (1000*3600*24) - 2)} дней</div>
+                            <a class="btn" href="chat.html?token=${chat.chat_token}">Перейти в чат →</a>
+                        </div>
+                    `;
+                });
+                html += `<button class="btn back" onclick="loadGroups()">◀️ Назад к группам</button>`;
+                document.getElementById('content').innerHTML = html;
+            } catch (err) {
+                document.getElementById('content').innerHTML = '<p>❌ Ошибка загрузки чатов</p>';
+                console.error(err);
+            }
         }
     </script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </body>
 </html>
