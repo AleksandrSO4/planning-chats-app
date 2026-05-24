@@ -101,6 +101,10 @@
             height: 100%;
             object-fit: cover;
         }
+        .avatar.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
 
         .chat-info { flex: 1; }
         .chat-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
@@ -133,6 +137,14 @@
             color: #bbb;
             display: flex;
             justify-content: space-between;
+        }
+
+        .disabled-chat {
+            opacity: 0.7;
+            background: #f9f9f9;
+        }
+        .disabled-chat .chat-card-main {
+            cursor: not-allowed;
         }
 
         .empty-state { text-align: center; padding: 48px 24px; }
@@ -321,11 +333,13 @@
             for (let idx = 0; idx < chats.length; idx++) {
                 const chat = chats[idx];
 
-                // ИСПРАВЛЕНИЕ: Используем birthday_date из API, если есть
+                // Проверяем, является ли пользователь именинником
+                const isBirthdayBoy = (chat.birthday_user_id == userId);
+
+                // Вычисляем дни до ДР
                 let daysUntil = null;
 
                 if (chat.birthday_date) {
-                    // Парсим дату в формате "--MM-DD"
                     const clean = chat.birthday_date.replace('--', '');
                     const month = parseInt(clean.substring(0, 2));
                     const day = parseInt(clean.substring(3, 5));
@@ -340,7 +354,6 @@
 
                     daysUntil = Math.ceil((birthday - today) / (1000 * 3600 * 24));
                 } else {
-                    // fallback: вычисляем из expires_at
                     const expiryDate = new Date(chat.expires_at);
                     const birthdayDate = new Date(expiryDate);
                     birthdayDate.setDate(birthdayDate.getDate() - 2);
@@ -357,6 +370,18 @@
                 let avatarId = `avatar-user-${chat.birthday_user_id}`;
                 let initial = getInitial(chat.birthday_name);
                 let avatarUrl = `/avatar/user/${chat.birthday_user_id}`;
+                let cardClass = '';
+                let clickHandler = '';
+                let disabledText = '';
+
+                if (isBirthdayBoy) {
+                    // Именинник не может зайти в чат
+                    cardClass = 'disabled-chat';
+                    clickHandler = 'onclick="showSurpriseMessage()"';
+                    disabledText = '🔒 Чат скрыт';
+                } else {
+                    clickHandler = `onclick="window.location.href='chat.html?token=${encodeURIComponent(chat.chat_token)}&name=${encodeURIComponent(chat.birthday_name)}'"`;
+                }
 
                 if (daysUntil < 0) {
                     status = 'past';
@@ -375,7 +400,6 @@
                     daysWord = formatDaysWord(daysUntil);
                 }
 
-                // Дни до закрытия чата
                 const expiryDate = new Date(chat.expires_at);
                 const today = new Date();
                 const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -384,12 +408,12 @@
                 let expiresText = expiresDays > 0 ? `Чат закроется через ${expiresDays} ${formatDaysWord(expiresDays)}` : 'Чат скоро закроется';
 
                 html += `
-                    <div class="chat-card">
-                        <a class="chat-card-main" href="chat.html?token=${encodeURIComponent(chat.chat_token)}">
-                            <div class="avatar" id="${avatarId}">${initial}</div>
+                    <div class="chat-card ${cardClass}">
+                        <div class="chat-card-main" ${clickHandler}>
+                            <div class="avatar ${isBirthdayBoy ? 'disabled' : ''}" id="${avatarId}">${initial}</div>
                             <div class="chat-info">
                                 <div class="chat-name">${escHtml(chat.birthday_name)}</div>
-                                <div class="chat-label">${status === 'past' ? 'День рождения прошёл' : 'До дня рождения:'}</div>
+                                <div class="chat-label">${isBirthdayBoy ? disabledText : (status === 'past' ? 'День рождения прошёл' : 'До дня рождения:')}</div>
                             </div>
                             <div class="days-block">
                                 <div class="days-number ${status === 'past' ? 'past' : (status === 'today' ? 'today' : (status === 'tomorrow' ? 'tomorrow' : ''))}">
@@ -397,10 +421,10 @@
                                 </div>
                                 <div class="days-label">${daysWord}</div>
                             </div>
-                        </a>
+                        </div>
                         <div class="chat-footer">
                             <span>⏱️ ${expiresText}</span>
-                            <span>💬 Открыть чат →</span>
+                            <span>${isBirthdayBoy ? '🔒 Недоступен' : '💬 Открыть чат →'}</span>
                         </div>
                     </div>
                 `;
@@ -415,6 +439,10 @@
             if (!silent) showError('Не удалось загрузить чаты');
             console.error(e);
         }
+    }
+
+    function showSurpriseMessage() {
+        alert('🎁 Эй! Тебе сейчас активно готовят сюрприз! Дождись дня рождения и получишь приятные пожелания от друзей! 🎂');
     }
 
     function showGroups() { loadGroups(); }
