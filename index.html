@@ -50,8 +50,13 @@
             margin-top: 1px;
         }
 
-        .back-btn {
+        .header-actions {
             margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .refresh-btn, .back-btn {
             background: #fff3ea;
             border: 1px solid #ffd4b0;
             color: #ff6b00;
@@ -60,9 +65,10 @@
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            display: none;
         }
 
+        .refresh-btn:active, .back-btn:active { background: #ffe0c8; }
+        .back-btn { display: none; }
         .back-btn.visible { display: block; }
 
         .content { padding: 20px; }
@@ -109,6 +115,13 @@
         .card-avatar.orange {
             background: #ff6b00;
             border-color: #ff6b00;
+            color: white;
+        }
+
+        .card-avatar.warning {
+            background: #ffaa00;
+            border-color: #ffaa00;
+            color: white;
         }
 
         .card-info { flex: 1; min-width: 0; }
@@ -126,12 +139,6 @@
             font-size: 12px;
             color: #888;
             margin-top: 2px;
-        }
-
-        .card-arrow {
-            font-size: 18px;
-            color: #ffb580;
-            flex-shrink: 0;
         }
 
         .badge {
@@ -153,19 +160,20 @@
             padding: 6px 10px;
             text-align: center;
             flex-shrink: 0;
-            min-width: 52px;
+            min-width: 70px;
         }
+
+        .days-badge.warning { background: #ffaa00; border-color: #ffaa00; color: white; }
+        .days-badge.danger { background: #cc5500; border-color: #cc5500; color: white; }
 
         .days-badge .days-num {
             font-size: 18px;
             font-weight: 700;
-            color: #ff6b00;
             line-height: 1;
         }
 
         .days-badge .days-label {
             font-size: 10px;
-            color: #ff9a50;
             margin-top: 2px;
         }
 
@@ -174,23 +182,9 @@
             padding: 48px 24px;
         }
 
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-
-        .empty-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 6px;
-        }
-
-        .empty-sub {
-            font-size: 13px;
-            color: #888;
-            line-height: 1.5;
-        }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
+        .empty-sub { font-size: 13px; color: #888; line-height: 1.5; }
 
         .loading {
             display: flex;
@@ -211,23 +205,7 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        .loading-text {
-            font-size: 14px;
-            color: #888;
-        }
-
-        .error-state {
-            background: #fff3ea;
-            border: 1px solid #ffd4b0;
-            border-radius: 14px;
-            padding: 16px;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .error-icon { font-size: 28px; margin-bottom: 8px; }
-        .error-text { font-size: 13px; color: #cc5500; }
+        .loading-text { font-size: 14px; color: #888; }
     </style>
 </head>
 <body>
@@ -238,14 +216,14 @@
         <div class="header-title">Чаты планирования</div>
         <div class="header-sub" id="header-sub">Выберите группу</div>
     </div>
-    <button class="back-btn" id="back-btn" onclick="showGroups()">← Назад</button>
+    <div class="header-actions">
+        <button class="refresh-btn" id="refresh-btn" onclick="refresh()">⟳</button>
+        <button class="back-btn" id="back-btn" onclick="showGroups()">← Назад</button>
+    </div>
 </div>
 
 <div class="content" id="content">
-    <div class="loading">
-        <div class="spinner"></div>
-        <div class="loading-text">Загрузка...</div>
-    </div>
+    <div class="loading"><div class="spinner"></div><div class="loading-text">Загрузка...</div></div>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -253,6 +231,10 @@
     const apiBase = 'https://birthdaybot-production-2460.up.railway.app';
     let userId = null;
     let currentGroups = [];
+    let autoRefreshInterval = null;
+    let currentView = 'groups';
+    let currentGroupId = null;
+    let currentGroupName = '';
 
     if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
@@ -266,71 +248,81 @@
         showError('Не удалось определить пользователя');
     } else {
         loadGroups();
+        startAutoRefresh();
+    }
+
+    function startAutoRefresh() {
+        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+        autoRefreshInterval = setInterval(() => {
+            if (currentView === 'chats' && currentGroupId) {
+                loadChats(currentGroupId, currentGroupName, true);
+            } else if (currentView === 'groups') {
+                loadGroups(true);
+            }
+        }, 30000);
+    }
+
+    function refresh() {
+        if (currentView === 'chats' && currentGroupId) {
+            loadChats(currentGroupId, currentGroupName, true);
+        } else {
+            loadGroups(true);
+        }
     }
 
     function setLoading(text = 'Загрузка...') {
-        document.getElementById('content').innerHTML = `
-            <div class="loading">
-                <div class="spinner"></div>
-                <div class="loading-text">${text}</div>
-            </div>`;
+        document.getElementById('content').innerHTML = `<div class="loading"><div class="spinner"></div><div class="loading-text">${text}</div></div>`;
     }
 
     function showError(msg) {
-        document.getElementById('content').innerHTML = `
-            <div class="error-state">
-                <div class="error-icon">😕</div>
-                <div class="error-text">${msg}</div>
-            </div>`;
+        document.getElementById('content').innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">Ошибка</div><div class="empty-sub">${msg}</div></div>`;
     }
 
-    async function loadGroups() {
-        document.getElementById('back-btn').classList.remove('visible');
-        document.getElementById('header-sub').textContent = 'Выберите группу';
-        setLoading('Загружаем группы...');
+    async function loadGroups(silent = false) {
+        if (!silent) {
+            setLoading('Загружаем группы...');
+            document.getElementById('back-btn').classList.remove('visible');
+            document.getElementById('header-sub').textContent = 'Выберите группу';
+        }
+        currentView = 'groups';
+        currentGroupId = null;
 
         try {
             const res = await fetch(`${apiBase}/my_groups/${userId}`);
             const groups = await res.json();
             currentGroups = groups;
-
             const content = document.getElementById('content');
 
             if (!groups.length) {
-                content.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">👥</div>
-                        <div class="empty-title">Нет групп</div>
-                        <div class="empty-sub">Вы не состоите ни в одной группе, где есть бот</div>
-                    </div>`;
+                content.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Нет групп</div><div class="empty-sub">Вы не состоите ни в одной группе, где есть бот</div></div>`;
                 return;
             }
 
             let html = `<div class="section-label">Ваши группы</div>`;
             groups.forEach(g => {
                 const name = g.group_name || `Группа ${g.group_id}`;
-                html += `
-                    <div class="card" onclick="loadChats(${g.group_id}, '${escHtml(name)}')">
-                        <div class="card-avatar">👥</div>
-                        <div class="card-info">
-                            <div class="card-name">${escHtml(name)}</div>
-                            <div class="card-meta">Нажмите, чтобы открыть чаты</div>
-                        </div>
-                        <div class="card-arrow">›</div>
-                    </div>`;
+                html += `<div class="card" onclick="loadChats(${g.group_id}, '${escHtml(name)}')">
+                            <div class="card-avatar">👥</div>
+                            <div class="card-info"><div class="card-name">${escHtml(name)}</div><div class="card-meta">Нажмите, чтобы открыть чаты</div></div>
+                            <div class="card-arrow">›</div>
+                        </div>`;
             });
             content.innerHTML = html;
-
         } catch (e) {
-            showError('Не удалось загрузить группы. Попробуйте позже.');
+            if (!silent) showError('Не удалось загрузить группы');
             console.error(e);
         }
     }
 
-    async function loadChats(groupId, groupName) {
-        document.getElementById('back-btn').classList.add('visible');
-        document.getElementById('header-sub').textContent = groupName;
-        setLoading('Загружаем чаты...');
+    async function loadChats(groupId, groupName, silent = false) {
+        if (!silent) {
+            setLoading('Загружаем чаты...');
+            document.getElementById('back-btn').classList.add('visible');
+            document.getElementById('header-sub').textContent = groupName;
+        }
+        currentView = 'chats';
+        currentGroupId = groupId;
+        currentGroupName = groupName;
 
         try {
             const res = await fetch(`${apiBase}/planning_chats/${groupId}`);
@@ -338,42 +330,55 @@
             const content = document.getElementById('content');
 
             if (!chats.length) {
-                content.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🎈</div>
-                        <div class="empty-title">Нет активных чатов</div>
-                        <div class="empty-sub">Чаты появятся автоматически за 7 дней до дня рождения</div>
-                    </div>`;
+                content.innerHTML = `<div class="empty-state"><div class="empty-icon">🎈</div><div class="empty-title">Нет активных чатов</div><div class="empty-sub">Чаты появятся автоматически за 7 дней до дня рождения</div></div>`;
                 return;
             }
 
             let html = `<div class="section-label">Активные чаты</div>`;
             chats.forEach(chat => {
-                const daysLeft = Math.max(0, Math.ceil((new Date(chat.expires_at) - new Date()) / 86400000) - 2);
-                html += `
-                    <a class="card" href="chat.html?token=${encodeURIComponent(chat.chat_token)}">
-                        <div class="card-avatar orange">🎂</div>
-                        <div class="card-info">
-                            <div class="card-name">${escHtml(chat.birthday_name)}</div>
-                            <div class="card-meta">Нажмите, чтобы открыть чат</div>
-                        </div>
-                        <div class="days-badge">
-                            <div class="days-num">${daysLeft}</div>
-                            <div class="days-label">дней</div>
-                        </div>
-                    </a>`;
+                const expiry = new Date(chat.expires_at);
+                const now = new Date();
+                const daysUntilExpiry = Math.max(0, Math.ceil((expiry - now) / 86400000));
+
+                let badgeClass = '';
+                let daysText = '';
+                let daysNum = 0;
+
+                if (chat.days_until !== undefined) {
+                    daysNum = chat.days_until;
+                    if (daysNum === 0) daysText = 'сегодня';
+                    else if (daysNum === 1) daysText = 'завтра';
+                    else daysText = `${daysNum} дн.`;
+                } else {
+                    daysNum = Math.max(0, Math.ceil((new Date(chat.birthday_date) - now) / 86400000));
+                    if (daysNum === 0) daysText = 'сегодня';
+                    else if (daysNum === 1) daysText = 'завтра';
+                    else daysText = `${daysNum} дн.`;
+                }
+
+                let avatarClass = 'orange';
+                if (daysNum === 0 || daysNum === 1) avatarClass = 'warning';
+
+                html += `<a class="card" href="chat.html?token=${encodeURIComponent(chat.chat_token)}">
+                            <div class="card-avatar ${avatarClass}">🎂</div>
+                            <div class="card-info">
+                                <div class="card-name">${escHtml(chat.birthday_name)}</div>
+                                <div class="card-meta">${daysText === 'сегодня' ? '🎉 День рождения сегодня!' : daysText === 'завтра' ? '⭐ День рождения завтра' : `До дня рождения: ${daysNum} дней`}</div>
+                            </div>
+                            <div class="days-badge ${daysNum <= 1 ? (daysNum === 0 ? 'danger' : 'warning') : ''}">
+                                <div class="days-num">${daysNum}</div>
+                                <div class="days-label">дней</div>
+                            </div>
+                        </a>`;
             });
             content.innerHTML = html;
-
         } catch (e) {
-            showError('Не удалось загрузить чаты. Попробуйте позже.');
+            if (!silent) showError('Не удалось загрузить чаты');
             console.error(e);
         }
     }
 
-    function showGroups() {
-        loadGroups();
-    }
+    function showGroups() { loadGroups(); }
 
     function escHtml(str) {
         return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
