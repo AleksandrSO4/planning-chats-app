@@ -298,112 +298,106 @@
     }
 
     async function loadChats(groupId, groupName, silent = false) {
-        if (!silent) {
-            document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка чатов...</div>';
-            document.getElementById('back-btn').classList.add('visible');
-            document.getElementById('header-sub').textContent = groupName;
-        }
-        currentView = 'chats';
-        currentGroupId = groupId;
-        currentGroupName = groupName;
-
-        try {
-            const res = await fetch(`${apiBase}/planning_chats/${groupId}`);
-            const chats = await res.json();
-
-            if (!chats.length) {
-                document.getElementById('content').innerHTML = `<div class="empty-state"><div class="empty-icon">🎈</div><div class="empty-title">Нет активных чатов</div><div class="empty-sub">Чаты появятся за 7 дней до дня рождения</div></div>`;
-                return;
-            }
-
-            let html = `<div class="section-label">🎯 Активные чаты</div>`;
-
-            for (let idx = 0; idx < chats.length; idx++) {
-                const chat = chats[idx];
-
-                // Исправленное вычисление дней с учётом часового пояса
-                const expiry = new Date(chat.expires_at);
-                const now = new Date();
-
-                // Получаем смещение часового пояса
-                const offset = now.getTimezoneOffset() * 60000;
-
-                // Корректируем даты на местное время
-                const birthdayDate = new Date(expiry);
-                birthdayDate.setDate(birthdayDate.getDate() - 2);
-                const localBirthday = new Date(birthdayDate.getTime() - offset);
-                const localNow = new Date(now.getTime() - offset);
-
-                // Вычисляем дни
-                let daysUntil = Math.ceil((localBirthday - localNow) / (1000 * 3600 * 24));
-
-                // Если сегодня, но часы показывают отрицательное значение
-                if (daysUntil < 0 && localBirthday.toDateString() === localNow.toDateString()) {
-                    daysUntil = 0;
-                }
-
-                let status = 'upcoming';
-                let daysNumText = '';
-                let daysWord = '';
-                let avatarId = `avatar-user-${chat.birthday_user_id}`;
-                let initial = getInitial(chat.birthday_name);
-                let avatarUrl = `/avatar/user/${chat.birthday_user_id}`;
-
-                if (daysUntil < 0) {
-                    status = 'past';
-                    daysNumText = '✓';
-                    daysWord = 'прошёл';
-                } else if (daysUntil === 0) {
-                    status = 'today';
-                    daysNumText = '🎉';
-                    daysWord = 'сегодня';
-                } else if (daysUntil === 1) {
-                    status = 'tomorrow';
-                    daysNumText = '⭐';
-                    daysWord = 'завтра';
-                } else {
-                    daysNumText = daysUntil;
-                    daysWord = formatDaysWord(daysUntil);
-                }
-
-                // Вычисляем дни до закрытия чата (тоже с учётом часового пояса)
-                const localExpiry = new Date(expiry.getTime() - offset);
-                let expiresDays = Math.ceil((localExpiry - localNow) / (1000 * 3600 * 24));
-                let expiresText = expiresDays > 0 ? `Чат закроется через ${expiresDays} ${formatDaysWord(expiresDays)}` : 'Чат скоро закроется';
-
-                html += `
-                    <div class="chat-card">
-                        <a class="chat-card-main" href="chat.html?token=${encodeURIComponent(chat.chat_token)}">
-                            <div class="avatar" id="${avatarId}">${initial}</div>
-                            <div class="chat-info">
-                                <div class="chat-name">${escHtml(chat.birthday_name)}</div>
-                                <div class="chat-label">${status === 'past' ? 'День рождения прошёл' : 'До дня рождения:'}</div>
-                            </div>
-                            <div class="days-block">
-                                <div class="days-number ${status === 'past' ? 'past' : (status === 'today' ? 'today' : (status === 'tomorrow' ? 'tomorrow' : ''))}">
-                                    ${daysNumText}
-                                </div>
-                                <div class="days-label">${daysWord}</div>
-                            </div>
-                        </a>
-                        <div class="chat-footer">
-                            <span>⏱️ ${expiresText}</span>
-                            <span>💬 Открыть чат →</span>
-                        </div>
-                    </div>
-                `;
-            }
-            document.getElementById('content').innerHTML = html;
-
-            for (const chat of chats) {
-                const avatarId = `avatar-user-${chat.birthday_user_id}`;
-                loadAvatar(`/avatar/user/${chat.birthday_user_id}`, avatarId);
-            }
-        } catch (e) {
-            if (!silent) showError('Не удалось загрузить чаты');
-            console.error(e);
-        }
+    if (!silent) {
+        document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка чатов...</div>';
+        document.getElementById('back-btn').classList.add('visible');
+        document.getElementById('header-sub').textContent = groupName;
     }
+    currentView = 'chats';
+    currentGroupId = groupId;
+    currentGroupName = groupName;
+
+    try {
+        const res = await fetch(`${apiBase}/planning_chats/${groupId}`);
+        const chats = await res.json();
+
+        if (!chats.length) {
+            document.getElementById('content').innerHTML = `<div class="empty-state"><div class="empty-icon">🎈</div><div class="empty-title">Нет активных чатов</div><div class="empty-sub">Чаты появятся за 7 дней до дня рождения</div></div>`;
+            return;
+        }
+
+        let html = `<div class="section-label">🎯 Активные чаты</div>`;
+
+        for (let idx = 0; idx < chats.length; idx++) {
+            const chat = chats[idx];
+
+            // Получаем дату ДР из expires_at (вычитаем 2 дня)
+            const expiryDate = new Date(chat.expires_at);
+            const birthdayDate = new Date(expiryDate);
+            birthdayDate.setDate(birthdayDate.getDate() - 2);
+
+            // Получаем сегодняшнюю дату в местном времени (без времени)
+            const today = new Date();
+            const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+            // Получаем дату ДР в местном времени
+            const localBirthday = new Date(birthdayDate.getFullYear(), birthdayDate.getMonth(), birthdayDate.getDate());
+
+            // Вычисляем разницу в днях
+            let daysUntil = Math.round((localBirthday - localToday) / (1000 * 3600 * 24));
+
+            let status = 'upcoming';
+            let daysNumText = '';
+            let daysWord = '';
+            let avatarId = `avatar-user-${chat.birthday_user_id}`;
+            let initial = getInitial(chat.birthday_name);
+            let avatarUrl = `/avatar/user/${chat.birthday_user_id}`;
+
+            if (daysUntil < 0) {
+                status = 'past';
+                daysNumText = '✓';
+                daysWord = 'прошёл';
+            } else if (daysUntil === 0) {
+                status = 'today';
+                daysNumText = '🎉';
+                daysWord = 'сегодня';
+            } else if (daysUntil === 1) {
+                status = 'tomorrow';
+                daysNumText = '⭐';
+                daysWord = 'завтра';
+            } else {
+                daysNumText = daysUntil;
+                daysWord = formatDaysWord(daysUntil);
+            }
+
+            // Дни до закрытия чата
+            const localExpiry = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), expiryDate.getDate());
+            let expiresDays = Math.round((localExpiry - localToday) / (1000 * 3600 * 24));
+            let expiresText = expiresDays > 0 ? `Чат закроется через ${expiresDays} ${formatDaysWord(expiresDays)}` : 'Чат скоро закроется';
+
+            html += `
+                <div class="chat-card">
+                    <a class="chat-card-main" href="chat.html?token=${encodeURIComponent(chat.chat_token)}">
+                        <div class="avatar" id="${avatarId}">${initial}</div>
+                        <div class="chat-info">
+                            <div class="chat-name">${escHtml(chat.birthday_name)}</div>
+                            <div class="chat-label">${status === 'past' ? 'День рождения прошёл' : 'До дня рождения:'}</div>
+                        </div>
+                        <div class="days-block">
+                            <div class="days-number ${status === 'past' ? 'past' : (status === 'today' ? 'today' : (status === 'tomorrow' ? 'tomorrow' : ''))}">
+                                ${daysNumText}
+                            </div>
+                            <div class="days-label">${daysWord}</div>
+                        </div>
+                    </a>
+                    <div class="chat-footer">
+                        <span>⏱️ ${expiresText}</span>
+                        <span>💬 Открыть чат →</span>
+                    </div>
+                </div>
+            `;
+        }
+        document.getElementById('content').innerHTML = html;
+
+        for (const chat of chats) {
+            const avatarId = `avatar-user-${chat.birthday_user_id}`;
+            loadAvatar(`/avatar/user/${chat.birthday_user_id}`, avatarId);
+        }
+    } catch (e) {
+        if (!silent) showError('Не удалось загрузить чаты');
+        console.error(e);
+    }
+}
 
     function showGroups() { loadGroups(); }
 </script>
