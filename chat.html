@@ -148,26 +148,6 @@
             padding: 60px 20px;
             color: #aaa;
         }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            gap: 10px;
-            color: #ff6b00;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #ffe0c8;
-            border-top-color: #ff6b00;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -175,13 +155,13 @@
 <div class="header">
     <button class="back-btn" onclick="goBack()">←</button>
     <div>
-        <div class="chat-title" id="chat-title">Загрузка...</div>
-        <div class="chat-sub" id="chat-sub">Чат планирования</div>
+        <div class="chat-title" id="chat-title">Чат планирования</div>
+        <div class="chat-sub" id="chat-sub">Обсуждение подарков</div>
     </div>
 </div>
 
 <div class="messages-container" id="messages-container">
-    <div class="loading"><div class="spinner"></div><span>Загрузка сообщений...</span></div>
+    <div class="empty-chat">💬 Сообщения загружаются...</div>
 </div>
 
 <div class="input-area">
@@ -196,7 +176,6 @@
     let token = null;
     let updateInterval = null;
 
-    // Получаем токен из URL
     const urlParams = new URLSearchParams(window.location.search);
     token = urlParams.get('token');
 
@@ -205,7 +184,6 @@
         throw new Error('No token');
     }
 
-    // Получаем user_id из Telegram
     if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
         Telegram.WebApp.expand();
@@ -219,7 +197,6 @@
         throw new Error('No user');
     }
 
-    // Загружаем сообщения
     async function loadMessages() {
         try {
             const res = await fetch(`${apiBase}/planning_chat/${token}/messages?user_id=${userId}`);
@@ -248,7 +225,6 @@
                 const senderName = msg.first_name || msg.username || 'Пользователь';
                 const time = new Date(msg.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                // Если это первое сообщение от этого пользователя, показываем имя
                 html += `
                     <div class="message ${isOwn ? 'message-own' : 'message-other'}">
                         ${!isOwn ? `<div class="message-name">${escapeHtml(senderName)}</div>` : ''}
@@ -265,7 +241,6 @@
         }
     }
 
-    // Отправка сообщения
     async function sendMessage() {
         const input = document.getElementById('message-input');
         const text = input.value.trim();
@@ -287,12 +262,11 @@
                 alert('Ошибка: ' + (error.detail || 'Не удалось отправить'));
             }
         } catch (e) {
-            alert('Ошибка сети. Проверьте подключение.');
+            alert('Ошибка сети');
             console.error(e);
         }
     }
 
-    // Отправка по Enter
     document.getElementById('message-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
@@ -306,7 +280,6 @@
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    // Запускаем загрузку сообщений и автообновление
     loadMessages();
     updateInterval = setInterval(loadMessages, 5000);
 </script>

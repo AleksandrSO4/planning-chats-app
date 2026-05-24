@@ -9,75 +9,67 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f5f0;
+            background: #fff8f2;
             min-height: 100vh;
             color: #1a1a1a;
         }
 
-        /* Шапка */
         .header {
             background: #fff;
+            border-bottom: 1px solid #ffe0c8;
             padding: 16px 20px;
             display: flex;
             align-items: center;
             gap: 12px;
-            border-bottom: 1px solid #eee;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         .header-icon {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             background: #ff6b00;
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
         }
 
-        .header-info { flex: 1; }
-        .header-title { font-size: 18px; font-weight: 600; color: #1a1a1a; }
-        .header-sub { font-size: 13px; color: #ff6b00; margin-top: 2px; }
+        .header-title { font-size: 17px; font-weight: 600; }
+        .header-sub { font-size: 12px; color: #ff6b00; margin-top: 2px; }
 
         .refresh-btn, .back-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
+            background: #fff3ea;
+            border: 1px solid #ffd4b0;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
             cursor: pointer;
-            padding: 8px;
-            border-radius: 10px;
             color: #ff6b00;
         }
-        .refresh-btn:active, .back-btn:active { background: #f0f0e8; }
         .back-btn { display: none; }
         .back-btn.visible { display: block; }
 
-        /* Контент */
-        .content { padding: 16px; }
+        .content { padding: 20px; }
 
         .section-label {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
             color: #ff6b00;
-            margin-bottom: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            margin-bottom: 12px;
         }
 
-        /* Карточка чата */
+        /* Карточка */
         .chat-card {
             background: #fff;
-            border-radius: 16px;
-            margin-bottom: 12px;
+            border: 1px solid #ffe0c8;
+            border-radius: 14px;
+            margin-bottom: 10px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
         }
-
-        .chat-card:active { background: #fafaf5; }
 
         .chat-card-main {
             padding: 16px;
@@ -89,28 +81,24 @@
         }
 
         .chat-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             background: #fff3ea;
+            border: 1px solid #ffd4b0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 22px;
             flex-shrink: 0;
         }
-        .chat-avatar.today { background: #ff6b00; }
-        .chat-avatar.tomorrow { background: #ffaa00; }
-        .chat-avatar.past { background: #ccc; }
+        .chat-avatar.today { background: #ff6b00; border-color: #ff6b00; color: white; }
+        .chat-avatar.tomorrow { background: #ffaa00; border-color: #ffaa00; color: white; }
+        .chat-avatar.past { background: #ccc; border-color: #ccc; }
 
         .chat-info { flex: 1; }
-        .chat-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 4px;
-        }
-        .chat-date { font-size: 13px; color: #888; }
+        .chat-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .chat-label { font-size: 11px; color: #aaa; margin-bottom: 2px; }
 
         .days-block {
             text-align: center;
@@ -118,47 +106,39 @@
             min-width: 65px;
         }
         .days-number {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
             color: #ff6b00;
             line-height: 1;
         }
-        .days-label {
-            font-size: 11px;
-            color: #aaa;
-            margin-top: 2px;
-        }
         .days-number.today { color: #ff6b00; }
         .days-number.tomorrow { color: #ffaa00; }
         .days-number.past { color: #aaa; }
+        .days-label {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 2px;
+        }
 
         .chat-footer {
-            padding: 8px 16px 12px 16px;
+            padding: 6px 16px 10px;
             border-top: 1px solid #f0f0e8;
-            font-size: 11px;
+            font-size: 10px;
             color: #bbb;
             display: flex;
             justify-content: space-between;
         }
 
-        /* Пустые состояния */
-        .empty-state {
-            text-align: center;
-            padding: 60px 24px;
-        }
+        .empty-state { text-align: center; padding: 48px 24px; }
         .empty-icon { font-size: 48px; margin-bottom: 12px; }
         .empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
         .empty-sub { font-size: 13px; color: #aaa; }
 
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: #aaa;
-        }
+        .loading { text-align: center; padding: 60px 20px; color: #aaa; }
         .spinner {
             width: 36px;
             height: 36px;
-            border: 3px solid #eee;
+            border: 3px solid #ffe0c8;
             border-top-color: #ff6b00;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -171,7 +151,7 @@
 
 <div class="header">
     <div class="header-icon">🎉</div>
-    <div class="header-info">
+    <div>
         <div class="header-title">Чаты планирования</div>
         <div class="header-sub" id="header-sub">Выберите группу</div>
     </div>
@@ -208,7 +188,6 @@
     }
 
     function formatDaysWord(days) {
-        if (days === 0) return 'дней';
         if (days === 1) return 'день';
         if (days >= 2 && days <= 4) return 'дня';
         return 'дней';
@@ -217,7 +196,7 @@
     function startAutoRefresh() {
         if (autoRefresh) clearInterval(autoRefresh);
         autoRefresh = setInterval(() => {
-            if (currentView === 'chats') {
+            if (currentView === 'chats' && currentGroupId) {
                 loadChats(currentGroupId, currentGroupName, true);
             } else if (currentView === 'groups') {
                 loadGroups(true);
@@ -226,7 +205,7 @@
     }
 
     function refresh() {
-        if (currentView === 'chats') {
+        if (currentView === 'chats' && currentGroupId) {
             loadChats(currentGroupId, currentGroupName, true);
         } else {
             loadGroups(true);
@@ -248,6 +227,7 @@
             document.getElementById('header-sub').textContent = 'Выберите группу';
         }
         currentView = 'groups';
+        currentGroupId = null;
 
         try {
             const res = await fetch(`${apiBase}/my_groups/${userId}`);
@@ -266,7 +246,7 @@
                                 <div class="chat-avatar">👥</div>
                                 <div class="chat-info">
                                     <div class="chat-name">${escHtml(name)}</div>
-                                    <div class="chat-date">Нажмите, чтобы открыть чаты</div>
+                                    <div class="chat-label">Нажмите, чтобы открыть чаты</div>
                                 </div>
                                 <div class="days-block">
                                     <div class="days-number">›</div>
@@ -305,46 +285,43 @@
             for (const chat of chats) {
                 const expiry = new Date(chat.expires_at);
                 const now = new Date();
-
-                // Вычисляем дни до ДР (из expires_at вычитаем 2 дня, так как чат живёт +2 дня)
                 const birthdayDate = new Date(expiry);
                 birthdayDate.setDate(birthdayDate.getDate() - 2);
 
                 let daysUntil = Math.ceil((birthdayDate - now) / 86400000);
                 let status = 'upcoming';
-                let daysText = '';
+                let daysNumText = '';
+                let daysWord = '';
                 let avatarIcon = '🎂';
                 let avatarClass = '';
 
                 if (daysUntil < 0) {
                     status = 'past';
-                    daysText = 'прошёл';
+                    daysNumText = '✓';
+                    daysWord = 'прошёл';
                     avatarIcon = '📅';
                     avatarClass = 'past';
                 } else if (daysUntil === 0) {
                     status = 'today';
-                    daysText = 'сегодня';
+                    daysNumText = '🎉';
+                    daysWord = 'сегодня';
                     avatarIcon = '🎉';
                     avatarClass = 'today';
                 } else if (daysUntil === 1) {
                     status = 'tomorrow';
-                    daysText = 'завтра';
+                    daysNumText = '⭐';
+                    daysWord = 'завтра';
                     avatarIcon = '⭐';
                     avatarClass = 'tomorrow';
                 } else {
-                    daysText = `${daysUntil} ${formatDaysWord(daysUntil)}`;
+                    daysNumText = daysUntil;
+                    daysWord = formatDaysWord(daysUntil);
                     avatarIcon = '🎂';
                     avatarClass = '';
                 }
 
-                // Время до закрытия чата (оставшиеся дни)
                 let expiresDays = Math.ceil((expiry - now) / 86400000);
-                let expiresText = '';
-                if (expiresDays > 0) {
-                    expiresText = `Чат закроется через ${expiresDays} ${formatDaysWord(expiresDays)}`;
-                } else {
-                    expiresText = 'Чат скоро закроется';
-                }
+                let expiresText = expiresDays > 0 ? `Чат закроется через ${expiresDays} ${formatDaysWord(expiresDays)}` : 'Чат скоро закроется';
 
                 html += `
                     <div class="chat-card">
@@ -352,15 +329,13 @@
                             <div class="chat-avatar ${avatarClass}">${avatarIcon}</div>
                             <div class="chat-info">
                                 <div class="chat-name">${escHtml(chat.birthday_name)}</div>
-                                <div class="chat-date">${status === 'past' ? 'День рождения уже прошёл' : `До дня рождения: ${daysText}`}</div>
+                                <div class="chat-label">${status === 'past' ? 'День рождения прошёл' : 'До дня рождения:'}</div>
                             </div>
                             <div class="days-block">
                                 <div class="days-number ${status === 'past' ? 'past' : (status === 'today' ? 'today' : (status === 'tomorrow' ? 'tomorrow' : ''))}">
-                                    ${status === 'past' ? '✓' : (status === 'today' ? '🎉' : (status === 'tomorrow' ? '⭐' : daysUntil))}
+                                    ${daysNumText}
                                 </div>
-                                <div class="days-label">
-                                    ${status === 'past' ? 'прошёл' : (status === 'today' ? 'сегодня' : (status === 'tomorrow' ? 'завтра' : 'дней'))}
-                                </div>
+                                <div class="days-label">${daysWord}</div>
                             </div>
                         </a>
                         <div class="chat-footer">
