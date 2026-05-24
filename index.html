@@ -9,205 +9,169 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #fff8f2;
+            background: #f5f5f0;
             min-height: 100vh;
             color: #1a1a1a;
         }
 
+        /* Шапка */
         .header {
             background: #fff;
-            border-bottom: 1px solid #ffe0c8;
             padding: 16px 20px;
             display: flex;
             align-items: center;
             gap: 12px;
+            border-bottom: 1px solid #eee;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         .header-icon {
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             background: #ff6b00;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .header-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-
-        .header-sub {
-            font-size: 12px;
-            color: #ff6b00;
-            margin-top: 1px;
-        }
-
-        .refresh-btn {
-            margin-left: auto;
-            background: #fff3ea;
-            border: 1px solid #ffd4b0;
-            color: #ff6b00;
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .refresh-btn:active { background: #ffe0c8; }
-
-        .back-btn {
-            background: #fff3ea;
-            border: 1px solid #ffd4b0;
-            color: #ff6b00;
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            display: none;
-        }
-
-        .back-btn.visible { display: block; }
-
-        .content { padding: 20px; }
-
-        .section-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #ff6b00;
-            text-transform: uppercase;
-            letter-spacing: 0.7px;
-            margin-bottom: 12px;
-        }
-
-        .card {
-            background: #fff;
-            border: 1px solid #ffe0c8;
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-            transition: background 0.15s, border-color 0.15s;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .card:active { background: #fff3ea; border-color: #ffb580; }
-
-        .card-avatar {
-            width: 44px;
-            height: 44px;
             border-radius: 12px;
-            background: #fff3ea;
-            border: 1px solid #ffd4b0;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 22px;
-            flex-shrink: 0;
         }
 
-        .card-avatar.orange {
-            background: #ff6b00;
-            border-color: #ff6b00;
-        }
+        .header-info { flex: 1; }
+        .header-title { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+        .header-sub { font-size: 13px; color: #ff6b00; margin-top: 2px; }
 
-        .card-info { flex: 1; min-width: 0; }
-
-        .card-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1a1a1a;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .card-meta {
-            font-size: 12px;
-            color: #888;
-            margin-top: 2px;
-        }
-
-        .card-arrow {
-            font-size: 18px;
-            color: #ffb580;
-            flex-shrink: 0;
-        }
-
-        .days-badge {
-            background: #fff3ea;
+        .refresh-btn, .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 10px;
             color: #ff6b00;
-            border: 1px solid #ffd4b0;
-            border-radius: 8px;
-            padding: 6px 10px;
-            text-align: center;
-            flex-shrink: 0;
-            min-width: 70px;
+        }
+        .refresh-btn:active, .back-btn:active { background: #f0f0e8; }
+        .back-btn { display: none; }
+        .back-btn.visible { display: block; }
+
+        /* Контент */
+        .content { padding: 16px; }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #ff6b00;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .days-badge.warning { background: #ffaa00; border-color: #ffaa00; color: white; }
-        .days-badge.danger { background: #cc5500; border-color: #cc5500; color: white; }
-
-        .days-badge .days-num {
-            font-size: 18px;
-            font-weight: 700;
-            line-height: 1;
+        /* Карточка чата */
+        .chat-card {
+            background: #fff;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
         }
 
-        .days-badge .days-label {
-            font-size: 10px;
-            margin-top: 2px;
-        }
+        .chat-card:active { background: #fafaf5; }
 
-        .empty-state {
-            text-align: center;
-            padding: 48px 24px;
-        }
-
-        .empty-icon { font-size: 48px; margin-bottom: 12px; }
-        .empty-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
-        .empty-sub { font-size: 13px; color: #888; line-height: 1.5; }
-
-        .loading {
+        .chat-card-main {
+            padding: 16px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .chat-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: #fff3ea;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 60px 20px;
-            gap: 14px;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        .chat-avatar.today { background: #ff6b00; }
+        .chat-avatar.tomorrow { background: #ffaa00; }
+        .chat-avatar.past { background: #ccc; }
+
+        .chat-info { flex: 1; }
+        .chat-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+        .chat-date { font-size: 13px; color: #888; }
+
+        .days-block {
+            text-align: center;
+            flex-shrink: 0;
+            min-width: 65px;
+        }
+        .days-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff6b00;
+            line-height: 1;
+        }
+        .days-label {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+        .days-number.today { color: #ff6b00; }
+        .days-number.tomorrow { color: #ffaa00; }
+        .days-number.past { color: #aaa; }
+
+        .chat-footer {
+            padding: 8px 16px 12px 16px;
+            border-top: 1px solid #f0f0e8;
+            font-size: 11px;
+            color: #bbb;
+            display: flex;
+            justify-content: space-between;
         }
 
+        /* Пустые состояния */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+        }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+        .empty-sub { font-size: 13px; color: #aaa; }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #aaa;
+        }
         .spinner {
             width: 36px;
             height: 36px;
-            border: 3px solid #ffe0c8;
+            border: 3px solid #eee;
             border-top-color: #ff6b00;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
         }
-
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text { font-size: 14px; color: #888; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="header-icon">🎉</div>
-    <div>
+    <div class="header-info">
         <div class="header-title">Чаты планирования</div>
         <div class="header-sub" id="header-sub">Выберите группу</div>
     </div>
@@ -216,10 +180,7 @@
 </div>
 
 <div class="content" id="content">
-    <div class="loading">
-        <div class="spinner"></div>
-        <div class="loading-text">Загрузка...</div>
-    </div>
+    <div class="loading"><div class="spinner"></div>Загрузка...</div>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -231,13 +192,12 @@
     let currentGroupId = null;
     let currentGroupName = '';
 
-    // Получаем ID пользователя из Telegram
     if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
         Telegram.WebApp.expand();
         Telegram.WebApp.setHeaderColor('#ffffff');
     } else {
-        userId = prompt('Введите ваш Telegram ID (для теста):');
+        userId = prompt('Введите ваш Telegram ID:');
     }
 
     if (!userId) {
@@ -247,12 +207,11 @@
         startAutoRefresh();
     }
 
-    // Функция для правильного склонения дней
-    function formatDays(days) {
-        if (days === 0) return 'сегодня';
-        if (days === 1) return 'завтра';
-        if (days >= 2 && days <= 4) return `${days} дня`;
-        return `${days} дней`;
+    function formatDaysWord(days) {
+        if (days === 0) return 'дней';
+        if (days === 1) return 'день';
+        if (days >= 2 && days <= 4) return 'дня';
+        return 'дней';
     }
 
     function startAutoRefresh() {
@@ -274,10 +233,6 @@
         }
     }
 
-    function setLoading(text = 'Загрузка...') {
-        document.getElementById('content').innerHTML = `<div class="loading"><div class="spinner"></div><div class="loading-text">${text}</div></div>`;
-    }
-
     function showError(msg) {
         document.getElementById('content').innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">Ошибка</div><div class="empty-sub">${msg}</div></div>`;
     }
@@ -288,12 +243,11 @@
 
     async function loadGroups(silent = false) {
         if (!silent) {
-            setLoading('Загружаем группы...');
+            document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка групп...</div>';
             document.getElementById('back-btn').classList.remove('visible');
             document.getElementById('header-sub').textContent = 'Выберите группу';
         }
         currentView = 'groups';
-        currentGroupId = null;
 
         try {
             const res = await fetch(`${apiBase}/my_groups/${userId}`);
@@ -304,20 +258,23 @@
                 return;
             }
 
-            let html = `<div class="section-label">Ваши группы</div>`;
+            let html = `<div class="section-label">📋 Ваши группы</div>`;
             groups.forEach(g => {
                 const name = g.group_name || `Группа ${g.group_id}`;
-                html += `<div class="card" onclick="loadChats(${g.group_id}, '${escHtml(name)}')">
-                            <div class="card-avatar">👥</div>
-                            <div class="card-info">
-                                <div class="card-name">${escHtml(name)}</div>
-                                <div class="card-meta">Нажмите, чтобы открыть чаты</div>
+                html += `<div class="chat-card" onclick="loadChats(${g.group_id}, '${escHtml(name)}')">
+                            <div class="chat-card-main">
+                                <div class="chat-avatar">👥</div>
+                                <div class="chat-info">
+                                    <div class="chat-name">${escHtml(name)}</div>
+                                    <div class="chat-date">Нажмите, чтобы открыть чаты</div>
+                                </div>
+                                <div class="days-block">
+                                    <div class="days-number">›</div>
+                                </div>
                             </div>
-                            <div class="card-arrow">›</div>
                         </div>`;
             });
             document.getElementById('content').innerHTML = html;
-
         } catch (e) {
             if (!silent) showError('Не удалось загрузить группы');
             console.error(e);
@@ -326,7 +283,7 @@
 
     async function loadChats(groupId, groupName, silent = false) {
         if (!silent) {
-            setLoading('Загружаем чаты...');
+            document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка чатов...</div>';
             document.getElementById('back-btn').classList.add('visible');
             document.getElementById('header-sub').textContent = groupName;
         }
@@ -339,50 +296,88 @@
             const chats = await res.json();
 
             if (!chats.length) {
-                document.getElementById('content').innerHTML = `<div class="empty-state"><div class="empty-icon">🎈</div><div class="empty-title">Нет активных чатов</div><div class="empty-sub">Чаты появятся автоматически за 7 дней до дня рождения</div></div>`;
+                document.getElementById('content').innerHTML = `<div class="empty-state"><div class="empty-icon">🎈</div><div class="empty-title">Нет активных чатов</div><div class="empty-sub">Чаты появятся за 7 дней до дня рождения</div></div>`;
                 return;
             }
 
-            let html = `<div class="section-label">Активные чаты</div>`;
-            chats.forEach(chat => {
+            let html = `<div class="section-label">🎯 Активные чаты</div>`;
+
+            for (const chat of chats) {
                 const expiry = new Date(chat.expires_at);
                 const now = new Date();
-                let daysNum = Math.max(0, Math.ceil((expiry - now) / 86400000) - 2);
-                const daysText = formatDays(daysNum);
 
-                let badgeClass = '';
-                let avatarClass = 'orange';
-                if (daysNum === 0) {
-                    badgeClass = 'danger';
-                    avatarClass = 'orange';
-                } else if (daysNum === 1) {
-                    badgeClass = 'warning';
-                    avatarClass = 'orange';
+                // Вычисляем дни до ДР (из expires_at вычитаем 2 дня, так как чат живёт +2 дня)
+                const birthdayDate = new Date(expiry);
+                birthdayDate.setDate(birthdayDate.getDate() - 2);
+
+                let daysUntil = Math.ceil((birthdayDate - now) / 86400000);
+                let status = 'upcoming';
+                let daysText = '';
+                let avatarIcon = '🎂';
+                let avatarClass = '';
+
+                if (daysUntil < 0) {
+                    status = 'past';
+                    daysText = 'прошёл';
+                    avatarIcon = '📅';
+                    avatarClass = 'past';
+                } else if (daysUntil === 0) {
+                    status = 'today';
+                    daysText = 'сегодня';
+                    avatarIcon = '🎉';
+                    avatarClass = 'today';
+                } else if (daysUntil === 1) {
+                    status = 'tomorrow';
+                    daysText = 'завтра';
+                    avatarIcon = '⭐';
+                    avatarClass = 'tomorrow';
+                } else {
+                    daysText = `${daysUntil} ${formatDaysWord(daysUntil)}`;
+                    avatarIcon = '🎂';
+                    avatarClass = '';
                 }
 
-                html += `<a class="card" href="chat.html?token=${encodeURIComponent(chat.chat_token)}">
-                            <div class="card-avatar ${avatarClass}">🎂</div>
-                            <div class="card-info">
-                                <div class="card-name">${escHtml(chat.birthday_name)}</div>
-                                <div class="card-meta">${daysText === 'сегодня' ? '🎉 День рождения сегодня!' : daysText === 'завтра' ? '⭐ День рождения завтра' : `До дня рождения: ${daysText}`}</div>
-                            </div>
-                            <div class="days-badge ${badgeClass}">
-                                <div class="days-num">${daysNum}</div>
-    <div class="days-label">${daysNum === 1 ? 'день' : (daysNum >= 2 && daysNum <= 4 ? 'дня' : 'дней')}</div>
-                            </div>
-                        </a>`;
-            });
-            document.getElementById('content').innerHTML = html;
+                // Время до закрытия чата (оставшиеся дни)
+                let expiresDays = Math.ceil((expiry - now) / 86400000);
+                let expiresText = '';
+                if (expiresDays > 0) {
+                    expiresText = `Чат закроется через ${expiresDays} ${formatDaysWord(expiresDays)}`;
+                } else {
+                    expiresText = 'Чат скоро закроется';
+                }
 
+                html += `
+                    <div class="chat-card">
+                        <a class="chat-card-main" href="chat.html?token=${encodeURIComponent(chat.chat_token)}">
+                            <div class="chat-avatar ${avatarClass}">${avatarIcon}</div>
+                            <div class="chat-info">
+                                <div class="chat-name">${escHtml(chat.birthday_name)}</div>
+                                <div class="chat-date">${status === 'past' ? 'День рождения уже прошёл' : `До дня рождения: ${daysText}`}</div>
+                            </div>
+                            <div class="days-block">
+                                <div class="days-number ${status === 'past' ? 'past' : (status === 'today' ? 'today' : (status === 'tomorrow' ? 'tomorrow' : ''))}">
+                                    ${status === 'past' ? '✓' : (status === 'today' ? '🎉' : (status === 'tomorrow' ? '⭐' : daysUntil))}
+                                </div>
+                                <div class="days-label">
+                                    ${status === 'past' ? 'прошёл' : (status === 'today' ? 'сегодня' : (status === 'tomorrow' ? 'завтра' : 'дней'))}
+                                </div>
+                            </div>
+                        </a>
+                        <div class="chat-footer">
+                            <span>⏱️ ${expiresText}</span>
+                            <span>💬 Открыть чат →</span>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('content').innerHTML = html;
         } catch (e) {
             if (!silent) showError('Не удалось загрузить чаты');
             console.error(e);
         }
     }
 
-    function showGroups() {
-        loadGroups();
-    }
+    function showGroups() { loadGroups(); }
 </script>
 </body>
 </html>
