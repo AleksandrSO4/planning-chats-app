@@ -15,7 +15,6 @@
             flex-direction: column;
         }
 
-        /* Шапка */
         .header {
             background: #fff;
             border-bottom: 1px solid #ffe0c8;
@@ -55,7 +54,6 @@
             margin-top: 2px;
         }
 
-        /* Сообщения */
         .messages-container {
             flex: 1;
             overflow-y: auto;
@@ -109,7 +107,6 @@
             margin-left: 8px;
         }
 
-        /* Панель ввода */
         .input-area {
             background: #fff;
             border-top: 1px solid #ffe0c8;
@@ -142,7 +139,6 @@
             justify-content: center;
             cursor: pointer;
             font-size: 20px;
-            transition: background 0.15s;
         }
 
         .send-btn:active { background: #cc5500; }
@@ -198,6 +194,7 @@
     const apiBase = 'https://birthdaybot-production-2460.up.railway.app';
     let userId = null;
     let token = null;
+    let updateInterval = null;
 
     // Получаем токен из URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -208,14 +205,13 @@
         throw new Error('No token');
     }
 
-    // Получаем user_id из Telegram WebApp
+    // Получаем user_id из Telegram
     if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
         Telegram.WebApp.expand();
         Telegram.WebApp.setHeaderColor('#ffffff');
     } else {
-        // Для теста вне Telegram (можно убрать, но оставим как fallback)
-        userId = prompt('Введите ваш Telegram ID (для теста):');
+        userId = prompt('Введите ваш Telegram ID:');
     }
 
     if (!userId) {
@@ -223,40 +219,16 @@
         throw new Error('No user');
     }
 
-    let currentChatName = '';
-    let updateInterval = null;
-
-    // Загружаем информацию о чате
-    async function loadChatInfo() {
-        try {
-            const res = await fetch(`${apiBase}/planning_chat/${token}/messages?user_id=${userId}`);
-            if (res.status === 403) {
-                document.getElementById('messages-container').innerHTML = '<div class="empty-chat">🔒 У вас нет доступа к этому чату</div>';
-                return false;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                if (data.length > 0 && data[0].birthday_name) {
-                    currentChatName = data[0].birthday_name;
-                    document.getElementById('chat-title').textContent = `🎂 ${currentChatName}`;
-                }
-                return true;
-            }
-            return false;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    }
-
     // Загружаем сообщения
     async function loadMessages() {
         try {
             const res = await fetch(`${apiBase}/planning_chat/${token}/messages?user_id=${userId}`);
+
             if (res.status === 403) {
-                document.getElementById('messages-container').innerHTML = '<div class="empty-chat">🔒 Доступ запрещён</div>';
+                document.getElementById('messages-container').innerHTML = '<div class="empty-chat">🔒 Нет доступа к этому чату</div>';
                 return;
             }
+
             if (!res.ok) {
                 document.getElementById('messages-container').innerHTML = '<div class="empty-chat">❌ Ошибка загрузки сообщений</div>';
                 return;
@@ -271,11 +243,12 @@
             }
 
             let html = '';
-            messages.forEach(msg => {
+            for (const msg of messages) {
                 const isOwn = msg.user_id == userId;
                 const senderName = msg.first_name || msg.username || 'Пользователь';
                 const time = new Date(msg.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+                // Если это первое сообщение от этого пользователя, показываем имя
                 html += `
                     <div class="message ${isOwn ? 'message-own' : 'message-other'}">
                         ${!isOwn ? `<div class="message-name">${escapeHtml(senderName)}</div>` : ''}
@@ -283,12 +256,12 @@
                         <div class="message-time">${time}</div>
                     </div>
                 `;
-            });
+            }
             container.innerHTML = html;
             container.scrollTop = container.scrollHeight;
         } catch (e) {
             console.error(e);
-            document.getElementById('messages-container').innerHTML = '<div class="empty-chat">❌ Ошибка подключения</div>';
+            document.getElementById('messages-container').innerHTML = '<div class="empty-chat">❌ Ошибка подключения к серверу</div>';
         }
     }
 
@@ -314,7 +287,7 @@
                 alert('Ошибка: ' + (error.detail || 'Не удалось отправить'));
             }
         } catch (e) {
-            alert('Ошибка сети');
+            alert('Ошибка сети. Проверьте подключение.');
             console.error(e);
         }
     }
@@ -329,16 +302,13 @@
         window.location.href = 'index.html';
     }
 
-    // Инициализация
-    async function init() {
-        const hasAccess = await loadChatInfo();
-        if (!hasAccess) return;
-        await loadMessages();
-        // Обновляем каждые 5 секунд
-        updateInterval = setInterval(loadMessages, 5000);
+    function escapeHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    init();
+    // Запускаем загрузку сообщений и автообновление
+    loadMessages();
+    updateInterval = setInterval(loadMessages, 5000);
 </script>
 </body>
 </html>

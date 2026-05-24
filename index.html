@@ -368,7 +368,7 @@
                             </div>
                             <div class="days-badge ${badgeClass}">
                                 <div class="days-num">${daysNum}</div>
-                                <div class="days-label">дней</div>
+    <div class="days-label">${daysNum === 1 ? 'день' : (daysNum >= 2 && daysNum <= 4 ? 'дня' : 'дней')}</div>
                             </div>
                         </a>`;
             });
