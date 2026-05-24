@@ -287,7 +287,6 @@
             });
             document.getElementById('content').innerHTML = html;
 
-            // Загружаем аватарки для групп
             for (const g of groups) {
                 const avatarId = `avatar-group-${g.group_id}`;
                 loadAvatar(`/avatar/group/${g.group_id}`, avatarId);
@@ -321,12 +320,28 @@
 
             for (let idx = 0; idx < chats.length; idx++) {
                 const chat = chats[idx];
+
+                // Исправленное вычисление дней с учётом часового пояса
                 const expiry = new Date(chat.expires_at);
                 const now = new Date();
+
+                // Получаем смещение часового пояса
+                const offset = now.getTimezoneOffset() * 60000;
+
+                // Корректируем даты на местное время
                 const birthdayDate = new Date(expiry);
                 birthdayDate.setDate(birthdayDate.getDate() - 2);
+                const localBirthday = new Date(birthdayDate.getTime() - offset);
+                const localNow = new Date(now.getTime() - offset);
 
-                let daysUntil = Math.ceil((birthdayDate - now) / 86400000);
+                // Вычисляем дни
+                let daysUntil = Math.ceil((localBirthday - localNow) / (1000 * 3600 * 24));
+
+                // Если сегодня, но часы показывают отрицательное значение
+                if (daysUntil < 0 && localBirthday.toDateString() === localNow.toDateString()) {
+                    daysUntil = 0;
+                }
+
                 let status = 'upcoming';
                 let daysNumText = '';
                 let daysWord = '';
@@ -351,7 +366,9 @@
                     daysWord = formatDaysWord(daysUntil);
                 }
 
-                let expiresDays = Math.ceil((expiry - now) / 86400000);
+                // Вычисляем дни до закрытия чата (тоже с учётом часового пояса)
+                const localExpiry = new Date(expiry.getTime() - offset);
+                let expiresDays = Math.ceil((localExpiry - localNow) / (1000 * 3600 * 24));
                 let expiresText = expiresDays > 0 ? `Чат закроется через ${expiresDays} ${formatDaysWord(expiresDays)}` : 'Чат скоро закроется';
 
                 html += `
@@ -378,7 +395,6 @@
             }
             document.getElementById('content').innerHTML = html;
 
-            // Загружаем аватарки для пользователей
             for (const chat of chats) {
                 const avatarId = `avatar-user-${chat.birthday_user_id}`;
                 loadAvatar(`/avatar/user/${chat.birthday_user_id}`, avatarId);
