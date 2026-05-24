@@ -354,37 +354,47 @@
 
             for (let idx = 0; idx < chats.length; idx++) {
                 const chat = chats[idx];
-
                 const isBirthdayBoy = (chat.birthday_user_id == userId);
 
-                // ПРАВИЛЬНОЕ вычисление дней до ДР
+                // ПРОСТОЕ И ПОНЯТНОЕ ВЫЧИСЛЕНИЕ ДНЕЙ
                 let daysUntil = null;
 
                 if (chat.birthday_date) {
+                    // Парсим дату из формата "--MM-DD"
                     const clean = chat.birthday_date.replace('--', '');
-                    const month = parseInt(clean.substring(0, 2));
-                    const day = parseInt(clean.substring(3, 5));
+                    const month = parseInt(clean.substring(0, 2), 10);
+                    const day = parseInt(clean.substring(3, 5), 10);
 
+                    // Сегодняшняя дата (без времени)
                     const today = new Date();
                     const currentYear = today.getFullYear();
 
+                    // Создаём дату ДР в этом году
                     let birthday = new Date(currentYear, month - 1, day);
+
+                    // Если ДР уже был в этом году, берём следующий год
                     if (birthday < today) {
                         birthday = new Date(currentYear + 1, month - 1, day);
                     }
 
-                    daysUntil = Math.ceil((birthday - today) / (1000 * 3600 * 24));
+                    // Вычисляем разницу в днях
+                    const diffTime = birthday - today;
+                    daysUntil = Math.ceil(diffTime / (1000 * 3600 * 24));
+
+                    // Дополнительная проверка: если разница 0 или отрицательная, но это сегодня
+                    if (daysUntil === 0 || (daysUntil < 0 && birthday.toDateString() === today.toDateString())) {
+                        daysUntil = 0;
+                    }
                 } else {
+                    // fallback из expires_at
                     const expiryDate = new Date(chat.expires_at);
                     const birthdayDate = new Date(expiryDate);
                     birthdayDate.setDate(birthdayDate.getDate() - 2);
-
-                    const today = new Date();
-                    const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                    const localBirthday = new Date(birthdayDate.getFullYear(), birthdayDate.getMonth(), birthdayDate.getDate());
-                    daysUntil = Math.round((localBirthday - localToday) / (1000 * 3600 * 24));
+                    const diffTime = birthdayDate - new Date();
+                    daysUntil = Math.ceil(diffTime / (1000 * 3600 * 24));
                 }
 
+                // Определяем статус
                 let status = 'upcoming';
                 let daysNumText = '';
                 let daysWord = '';
@@ -418,10 +428,11 @@
                     daysWord = formatDaysWord(daysUntil);
                 }
 
+                // Дни до закрытия чата
                 const expiryDate = new Date(chat.expires_at);
+                const localExpiry = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), expiryDate.getDate());
                 const today = new Date();
                 const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                const localExpiry = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), expiryDate.getDate());
                 let expiresDays = Math.round((localExpiry - localToday) / (1000 * 3600 * 24));
                 let expiresText = expiresDays > 0 ? `Чат закроется через ${expiresDays} ${formatDaysWord(expiresDays)}` : 'Чат скоро закроется';
 
