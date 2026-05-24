@@ -101,10 +101,7 @@
             height: 100%;
             object-fit: cover;
         }
-        .avatar.disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
+        .avatar.disabled { background: #ccc; }
 
         .chat-info { flex: 1; }
         .chat-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
@@ -139,13 +136,8 @@
             justify-content: space-between;
         }
 
-        .disabled-chat {
-            opacity: 0.7;
-            background: #f9f9f9;
-        }
-        .disabled-chat .chat-card-main {
-            cursor: not-allowed;
-        }
+        .disabled-chat { opacity: 0.7; background: #f9f9f9; }
+        .disabled-chat .chat-card-main { cursor: default; }
 
         .empty-state { text-align: center; padding: 48px 24px; }
         .empty-icon { font-size: 48px; margin-bottom: 12px; }
@@ -163,6 +155,26 @@
             margin: 0 auto 12px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: fadeOut 3s ease-out forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
     </style>
 </head>
 <body>
@@ -232,6 +244,16 @@
         const first = name.trim().charAt(0).toUpperCase();
         if (/[А-ЯЁA-Z]/.test(first)) return first;
         return '👥';
+    }
+
+    function showToast(message) {
+        const existingToast = document.querySelector('.toast');
+        if (existingToast) existingToast.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
 
     function startAutoRefresh() {
@@ -333,10 +355,9 @@
             for (let idx = 0; idx < chats.length; idx++) {
                 const chat = chats[idx];
 
-                // Проверяем, является ли пользователь именинником
                 const isBirthdayBoy = (chat.birthday_user_id == userId);
 
-                // Вычисляем дни до ДР
+                // ПРАВИЛЬНОЕ вычисление дней до ДР
                 let daysUntil = null;
 
                 if (chat.birthday_date) {
@@ -372,13 +393,10 @@
                 let avatarUrl = `/avatar/user/${chat.birthday_user_id}`;
                 let cardClass = '';
                 let clickHandler = '';
-                let disabledText = '';
 
                 if (isBirthdayBoy) {
-                    // Именинник не может зайти в чат
                     cardClass = 'disabled-chat';
                     clickHandler = 'onclick="showSurpriseMessage()"';
-                    disabledText = '🔒 Чат скрыт';
                 } else {
                     clickHandler = `onclick="window.location.href='chat.html?token=${encodeURIComponent(chat.chat_token)}&name=${encodeURIComponent(chat.birthday_name)}'"`;
                 }
@@ -413,7 +431,7 @@
                             <div class="avatar ${isBirthdayBoy ? 'disabled' : ''}" id="${avatarId}">${initial}</div>
                             <div class="chat-info">
                                 <div class="chat-name">${escHtml(chat.birthday_name)}</div>
-                                <div class="chat-label">${isBirthdayBoy ? disabledText : (status === 'past' ? 'День рождения прошёл' : 'До дня рождения:')}</div>
+                                <div class="chat-label">${isBirthdayBoy ? '🎁 Чат скрыт' : (status === 'past' ? 'День рождения прошёл' : 'До дня рождения:')}</div>
                             </div>
                             <div class="days-block">
                                 <div class="days-number ${status === 'past' ? 'past' : (status === 'today' ? 'today' : (status === 'tomorrow' ? 'tomorrow' : ''))}">
@@ -442,7 +460,7 @@
     }
 
     function showSurpriseMessage() {
-        alert('🎁 Эй! Тебе сейчас активно готовят сюрприз! Дождись дня рождения и получишь приятные пожелания от друзей! 🎂');
+        showToast('🎁 Эй! Тебе сейчас активно готовят сюрприз! Дождись дня рождения! 🎂');
     }
 
     function showGroups() { loadGroups(); }
