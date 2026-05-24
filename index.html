@@ -365,21 +365,23 @@
                     const month = parseInt(clean.substring(0, 2), 10);
                     const day = parseInt(clean.substring(3, 5), 10);
 
-                    // Сегодняшняя дата (без времени)
-                    const today = new Date();
-                    const currentYear = today.getFullYear();
+                    // Сегодняшняя дата БЕЗ времени
+                    const now = new Date();
+                    const todayClean = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    const currentYear = now.getFullYear();
 
                     // Создаём дату ДР в этом году
                     let birthday = new Date(currentYear, month - 1, day);
 
-                    // Если ДР уже был в этом году, берём следующий год
-                    if (birthday < today) {
+                    // Если ДР уже был в этом году (строго раньше сегодня), берём следующий год
+                    if (birthday < todayClean) {
                         birthday = new Date(currentYear + 1, month - 1, day);
                     }
 
-                    // Вычисляем разницу в днях
-                    const diffTime = birthday - today;
-                    daysUntil = Math.ceil(diffTime / (1000 * 3600 * 24));
+                    // Вычисляем разницу в целых днях
+                    const diffTime = birthday - todayClean;
+                    daysUntil = Math.round(diffTime / (1000 * 3600 * 24));
+
 
                     // Дополнительная проверка: если разница 0 или отрицательная, но это сегодня
                     if (daysUntil === 0 || (daysUntil < 0 && birthday.toDateString() === today.toDateString())) {
