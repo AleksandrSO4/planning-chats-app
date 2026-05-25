@@ -298,7 +298,11 @@
             for (const msg of messages) {
                 const isOwn = msg.user_id == userId;
                 const senderName = msg.first_name || msg.username || 'Пользователь';
-                const time = new Date(msg.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const time = new Date(msg.sent_at).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone  // явно указываем часовой пояс
+                });
 
                 // Проверяем, есть ли в сообщении ссылка на фото
                 let messageContent = escapeHtml(msg.message);
