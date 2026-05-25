@@ -299,13 +299,11 @@
                 const isOwn = msg.user_id == userId;
                 const senderName = msg.first_name || msg.username || 'Пользователь';
 
-                // Правильное преобразование времени
-                const utcDate = new Date(msg.sent_at);
-                const localTime = utcDate.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                });
+                // Простое и надёжное форматирование времени
+                const date = new Date(msg.sent_at);
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const localTime = `${hours}:${minutes}`;
 
                 // Проверяем, есть ли в сообщении ссылка на фото
                 let messageContent = escapeHtml(msg.message);
@@ -322,6 +320,12 @@
                     </div>
                 `;
             }
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
+        } catch (e) {
+            console.error(e);
+            document.getElementById('messages-container').innerHTML = '<div class="empty-chat">❌ Ошибка подключения к серверу</div>';
+        }
     }
 
     async function sendMessage() {
