@@ -298,10 +298,13 @@
             for (const msg of messages) {
                 const isOwn = msg.user_id == userId;
                 const senderName = msg.first_name || msg.username || 'Пользователь';
-                const time = new Date(msg.sent_at).toLocaleTimeString([], {
+
+                // Правильное преобразование времени
+                const utcDate = new Date(msg.sent_at);
+                const localTime = utcDate.toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit',
-                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone  // явно указываем часовой пояс
+                    hour12: false
                 });
 
                 // Проверяем, есть ли в сообщении ссылка на фото
@@ -315,16 +318,10 @@
                     <div class="message ${isOwn ? 'message-own' : 'message-other'}">
                         ${!isOwn ? `<div class="message-name">${escapeHtml(senderName)}</div>` : ''}
                         <div class="message-bubble">${messageContent}</div>
-                        <div class="message-time">${time}</div>
+                        <div class="message-time">${localTime}</div>
                     </div>
                 `;
             }
-            container.innerHTML = html;
-            container.scrollTop = container.scrollHeight;
-        } catch (e) {
-            console.error(e);
-            document.getElementById('messages-container').innerHTML = '<div class="empty-chat">❌ Ошибка подключения к серверу</div>';
-        }
     }
 
     async function sendMessage() {
