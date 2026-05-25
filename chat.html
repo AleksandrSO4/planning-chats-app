@@ -131,6 +131,14 @@
             margin-left: 8px;
         }
 
+        .message-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 12px;
+            margin-top: 4px;
+            cursor: pointer;
+        }
+
         .input-area {
             background: #fff;
             border-top: 1px solid #ffe0c8;
@@ -323,7 +331,8 @@
                 let messageContent = escapeHtml(msg.message);
                 const photoMatch = msg.message.match(/\[Фото\]\((https:\/\/[^\)]+)\)/);
                 if (photoMatch) {
-                    messageContent = `📷 <a href="${photoMatch[1]}" target="_blank">Открыть фото</a>`;
+                    const photoUrl = photoMatch[1];
+                    messageContent = `<img src="${photoUrl}" class="message-image" onclick="window.open('${photoUrl}', '_blank')">`;
                 }
 
                 html += `
@@ -384,8 +393,6 @@
         input.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
-            alert('📤 Загрузка фото...');
 
             const formData = new FormData();
             formData.append('file', file);
