@@ -547,17 +547,35 @@
                 listEl.innerHTML = '<p style="text-align:center;color:#aaa;padding:20px;">Нет участников</p>';
             } else {
                 let html = '';
-                participants.forEach(p => {
+                for (const p of participants) {
                     const name = p.first_name || p.username || `User ${p.user_id}`;
                     const initial = name[0].toUpperCase();
+                    const avatarId = `avatar-${p.user_id}`;
+
                     html += `
                         <div class="participant-item">
-                            <div class="participant-avatar">${initial}</div>
+                            <div class="participant-avatar" id="${avatarId}">${initial}</div>
                             <div class="participant-name">${escapeHtml(name)}</div>
                         </div>
                     `;
-                });
+                }
                 listEl.innerHTML = html;
+
+                // Загружаем аватарки после отрисовки
+                for (const p of participants) {
+                    const avatarId = `avatar-${p.user_id}`;
+                    fetch(`${apiBase}/avatar/user/${p.user_id}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.exists && data.url) {
+                                const avatarDiv = document.getElementById(avatarId);
+                                if (avatarDiv) {
+                                    avatarDiv.innerHTML = `<img src="${data.url}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">`;
+                                }
+                            }
+                        })
+                        .catch(err => console.error('Avatar load error:', err));
+                }
             }
 
             document.getElementById('participants-modal').classList.add('visible');
