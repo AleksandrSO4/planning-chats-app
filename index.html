@@ -4,237 +4,345 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Чаты планирования</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
         :root {
-            --bg: #faf7f6;
+            --bg: #f5f0fb;
             --card: #ffffff;
-            --grad: linear-gradient(135deg, #ff6462 0%, #d85aa9 50%, #7b4dff 100%);
-            --primary: #ff6462;
-            --secondary: #7b4dff;
-            --accent: #f6c85f;
-            --text: #1f1f25;
-            --muted: #8b8b95;
-            --shadow: 0 8px 30px rgba(123, 77, 255, 0.12);
+            --grad: linear-gradient(135deg, #f76fa1 0%, #c260e8 60%, #7b52f0 100%);
+            --grad-soft: linear-gradient(135deg, rgba(247,111,161,0.12) 0%, rgba(123,82,240,0.08) 100%);
+            --primary: #e056a0;
+            --secondary: #7b52f0;
+            --accent: #f76fa1;
+            --text: #1a1626;
+            --muted: #9490a8;
+            --border: rgba(123,82,240,0.10);
+            --shadow-card: 0 2px 16px rgba(123,82,240,0.10);
+            --shadow-strong: 0 8px 32px rgba(123,82,240,0.18);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
+        /* Decorative blobs */
         body::before {
             content: "";
             position: fixed;
-            top: -150px;
-            right: -150px;
-            width: 350px;
-            height: 350px;
-            background: radial-gradient(circle, rgba(255, 100, 98, 0.18), transparent 70%);
-            pointer-events: none;
-            z-index: -1;
+            top: -80px; right: -80px;
+            width: 260px; height: 260px;
+            background: radial-gradient(circle, rgba(247,111,161,0.22), transparent 65%);
+            pointer-events: none; z-index: 0;
         }
-
         body::after {
             content: "";
             position: fixed;
-            bottom: -120px;
-            left: -120px;
-            width: 280px;
-            height: 280px;
-            background: radial-gradient(circle, rgba(123, 77, 255, 0.15), transparent 70%);
-            pointer-events: none;
-            z-index: -1;
+            bottom: -60px; left: -60px;
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(123,82,240,0.18), transparent 65%);
+            pointer-events: none; z-index: 0;
         }
 
+        /* HEADER */
         .header {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(16px);
-            padding: 16px 20px;
+            background: rgba(255,255,255,0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 14px 18px;
             display: flex;
             align-items: center;
             gap: 12px;
             position: sticky;
             top: 0;
-            z-index: 10;
-            border: none;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+            z-index: 20;
+            box-shadow: 0 1px 0 var(--border);
         }
 
         .header-icon {
-            width: 38px;
-            height: 38px;
+            width: 40px; height: 40px;
             background: var(--grad);
             border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-size: 20px;
-            color: white;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 14px rgba(247,111,161,0.35);
+            flex-shrink: 0;
         }
 
-        .header-info { flex: 1; }
-        .header-title { font-size: 17px; font-weight: 600; }
-        .header-sub { font-size: 12px; color: var(--primary); margin-top: 2px; }
+        .header-info { flex: 1; min-width: 0; }
+        .header-title {
+            font-size: 17px; font-weight: 800;
+            letter-spacing: -0.3px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .header-sub {
+            font-size: 12px; color: var(--primary);
+            font-weight: 600; margin-top: 1px;
+        }
 
-        .refresh-btn, .back-btn {
+        .header-btn {
             background: #fff;
             border: none;
-            box-shadow: var(--shadow);
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 13px;
+            box-shadow: var(--shadow-card);
+            border-radius: 12px;
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
             cursor: pointer;
             color: var(--secondary);
+            flex-shrink: 0;
+            transition: transform 0.15s, box-shadow 0.15s;
         }
+        .header-btn:active { transform: scale(0.93); }
         .back-btn { display: none; }
-        .back-btn.visible { display: block; }
+        .back-btn.visible { display: flex; }
 
-        .content { padding: 20px; }
+        /* CONTENT */
+        .content { padding: 18px 16px 100px; position: relative; z-index: 1; }
 
+        /* SECTION LABEL */
         .section-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--primary);
+            font-size: 11px; font-weight: 800;
+            color: var(--secondary);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
+            letter-spacing: 0.8px;
+            margin-bottom: 14px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .section-label::after {
+            content: "";
+            flex: 1; height: 1px;
+            background: var(--border);
         }
 
+        /* CHAT CARD */
         .chat-card {
-            background: #fff;
-            border: none;
-            border-radius: 22px;
-            margin-bottom: 10px;
+            background: var(--card);
+            border-radius: 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-card);
             overflow: hidden;
-            box-shadow: var(--shadow);
+            transition: transform 0.15s, box-shadow 0.15s;
+            border: 1px solid var(--border);
         }
+        .chat-card:active { transform: scale(0.985); box-shadow: var(--shadow-strong); }
+        .chat-card.disabled-chat { opacity: 0.65; }
+        .chat-card.disabled-chat:active { transform: none; }
 
         .chat-card-main {
-            padding: 16px;
+            padding: 14px 16px;
             display: flex;
             align-items: center;
             gap: 14px;
-            text-decoration: none;
-            color: inherit;
             cursor: pointer;
         }
+        .disabled-chat .chat-card-main { cursor: default; }
 
+        /* AVATAR */
         .avatar {
-            width: 48px;
-            height: 48px;
+            width: 50px; height: 50px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 600;
-            flex-shrink: 0;
             background: var(--grad);
             color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 800;
+            flex-shrink: 0;
             overflow: hidden;
+            box-shadow: 0 4px 12px rgba(247,111,161,0.25);
         }
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar.greyed { background: linear-gradient(135deg, #c8c8d0, #a8a8b8); box-shadow: none; }
+
+        /* CHAT INFO */
+        .chat-info { flex: 1; min-width: 0; }
+        .chat-name {
+            font-size: 16px; font-weight: 800;
+            letter-spacing: -0.2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 3px;
         }
-        .avatar.disabled { background: #ccc; }
+        .chat-label {
+            font-size: 12px; color: var(--muted); font-weight: 600;
+        }
 
-        .chat-info { flex: 1; }
-        .chat-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-        .chat-label { font-size: 11px; color: var(--muted); }
-
+        /* DAYS BLOCK */
         .days-block {
             text-align: center;
             flex-shrink: 0;
-            min-width: 65px;
+            min-width: 64px;
         }
         .days-number {
-            font-size: 26px;
-            font-weight: 700;
+            font-size: 28px; font-weight: 800;
             background: var(--grad);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             line-height: 1;
+            letter-spacing: -1px;
         }
-        .days-number.today { color: var(--primary); -webkit-text-fill-color: var(--primary); }
-        .days-number.tomorrow { color: #ffaa00; -webkit-text-fill-color: #ffaa00; }
-        .days-number.past { color: var(--muted); -webkit-text-fill-color: var(--muted); }
+        .days-number.today {
+            background: none;
+            -webkit-text-fill-color: var(--primary);
+            font-size: 24px;
+        }
+        .days-number.tomorrow {
+            background: linear-gradient(135deg, #f7a21f, #f76fa1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .days-number.past {
+            background: none;
+            -webkit-text-fill-color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
         .days-label {
-            font-size: 10px;
+            font-size: 10px; font-weight: 700;
             color: var(--muted);
             margin-top: 2px;
+            text-transform: lowercase;
         }
 
+        /* CARD FOOTER */
         .chat-footer {
-            padding: 6px 16px 10px;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-            font-size: 10px;
-            color: var(--muted);
+            padding: 8px 16px 10px;
+            border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
+            align-items: center;
+        }
+        .footer-expires {
+            font-size: 11px; color: var(--muted); font-weight: 600;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .footer-action {
+            font-size: 11px; font-weight: 700; color: var(--secondary);
+            display: flex; align-items: center; gap: 3px;
         }
 
-        .disabled-chat { opacity: 0.7; background: #f9f9f9; }
-        .disabled-chat .chat-card-main { cursor: default; }
+        /* GROUP CARD (for groups list) */
+        .group-card {
+            background: var(--card);
+            border-radius: 20px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.15s;
+            overflow: hidden;
+        }
+        .group-card:active { transform: scale(0.985); }
+        .group-card-inner {
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .group-chevron {
+            font-size: 18px; color: var(--muted);
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        .group-info { flex: 1; min-width: 0; }
+        .group-name {
+            font-size: 16px; font-weight: 800;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .group-hint { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 2px; }
 
-        .empty-state { text-align: center; padding: 48px 24px; }
-        .empty-icon { font-size: 48px; margin-bottom: 12px; }
-        .empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-        .empty-sub { font-size: 13px; color: var(--muted); }
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+        }
+        .empty-icon { font-size: 52px; margin-bottom: 14px; }
+        .empty-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+        .empty-sub { font-size: 13px; color: var(--muted); font-weight: 600; line-height: 1.5; }
 
+        /* LOADING */
         .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
         .spinner {
-            width: 36px;
-            height: 36px;
-            border: 3px solid rgba(0, 0, 0, 0.05);
+            width: 32px; height: 32px;
+            border: 3px solid rgba(123,82,240,0.12);
             border-top-color: var(--secondary);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 12px;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 14px;
         }
+        .loading-text { font-size: 14px; font-weight: 600; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* ADD BUTTON */
+        .add-fab {
+            position: fixed;
+            bottom: 28px; left: 16px; right: 16px;
+            background: var(--grad);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 16px;
+            font-size: 16px; font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 28px rgba(247,111,161,0.40);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            z-index: 10;
+            transition: transform 0.15s, box-shadow 0.15s;
+            font-family: 'Nunito', sans-serif;
+        }
+        .add-fab:active { transform: scale(0.97); box-shadow: 0 4px 14px rgba(247,111,161,0.30); }
+
+        /* TOAST */
         .toast {
             position: fixed;
-            bottom: 30px;
-            left: 20px;
-            right: 20px;
-            background: #1a1a1a;
+            bottom: 100px; left: 16px; right: 16px;
+            background: #1a1626;
             color: white;
             text-align: center;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 14px;
+            padding: 13px 16px;
+            border-radius: 16px;
+            font-size: 14px; font-weight: 600;
             z-index: 1000;
-            animation: fadeOut 3s ease-out forwards;
+            animation: toastAnim 3s ease-out forwards;
+            font-family: 'Nunito', sans-serif;
         }
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
+        @keyframes toastAnim {
+            0% { opacity: 0; transform: translateY(10px); }
+            15% { opacity: 1; transform: translateY(0); }
+            75% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* PAST BADGE */
+        .past-badge {
+            background: rgba(148,144,168,0.12);
+            color: var(--muted);
+            border-radius: 8px;
+            padding: 3px 8px;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.3px;
         }
     </style>
 </head>
 <body>
 
 <div class="header">
+    <button class="header-btn back-btn" id="back-btn" onclick="showGroups()">←</button>
     <div class="header-icon">🎉</div>
     <div class="header-info">
         <div class="header-title">Чаты планирования</div>
         <div class="header-sub" id="header-sub">Выберите группу</div>
     </div>
-    <button class="refresh-btn" onclick="refresh()">⟳</button>
-    <button class="back-btn" id="back-btn" onclick="showGroups()">← Назад</button>
+    <button class="header-btn" onclick="refresh()" title="Обновить">↻</button>
 </div>
 
 <div class="content" id="content">
-    <div class="loading"><div class="spinner"></div>Загрузка...</div>
+    <div class="loading"><div class="spinner"></div><div class="loading-text">Загружаем...</div></div>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -262,8 +370,9 @@
     }
 
     function formatDaysWord(days) {
-        if (days === 1) return 'день';
-        if (days >= 2 && days <= 4) return 'дня';
+        const abs = Math.abs(days);
+        if (abs === 1) return 'день';
+        if (abs >= 2 && abs <= 4) return 'дня';
         return 'дней';
     }
 
@@ -273,31 +382,26 @@
             const res = await fetch(fullUrl);
             const data = await res.json();
             if (data.exists && data.url) {
-                const element = document.getElementById(elementId);
-                if (element) {
-                    element.innerHTML = `<img src="${data.url}" alt="avatar">`;
-                }
+                const el = document.getElementById(elementId);
+                if (el) el.innerHTML = `<img src="${data.url}" alt="">`;
             }
-        } catch(e) {
-            console.error('Avatar load error:', e);
-        }
+        } catch(e) {}
     }
 
     function getInitial(name) {
         if (!name) return '?';
         const first = name.trim().charAt(0).toUpperCase();
-        if (/[А-ЯЁA-Z]/.test(first)) return first;
-        return '👥';
+        return /[А-ЯЁA-Z]/.test(first) ? first : '👥';
     }
 
-    function showToast(message) {
-        const existingToast = document.querySelector('.toast');
-        if (existingToast) existingToast.remove();
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+    function showToast(msg) {
+        const old = document.querySelector('.toast');
+        if (old) old.remove();
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3200);
     }
 
     function startAutoRefresh() {
@@ -320,7 +424,8 @@
     }
 
     function showError(msg) {
-        document.getElementById('content').innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">Ошибка</div><div class="empty-sub">${msg}</div></div>`;
+        document.getElementById('content').innerHTML =
+            `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">Что-то пошло не так</div><div class="empty-sub">${msg}</div></div>`;
     }
 
     function escHtml(str) {
@@ -329,7 +434,8 @@
 
     async function loadGroups(silent = false) {
         if (!silent) {
-            document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка групп...</div>';
+            document.getElementById('content').innerHTML =
+                '<div class="loading"><div class="spinner"></div><div class="loading-text">Загружаем группы...</div></div>';
             document.getElementById('back-btn').classList.remove('visible');
             document.getElementById('header-sub').textContent = 'Выберите группу';
         }
@@ -341,43 +447,40 @@
             const groups = await res.json();
 
             if (!groups.length) {
-                document.getElementById('content').innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Нет групп</div><div class="empty-sub">Вы не состоите ни в одной группе, где есть бот</div></div>`;
+                document.getElementById('content').innerHTML =
+                    `<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Нет групп</div><div class="empty-sub">Вы не состоите ни в одной группе с ботом</div></div>`;
                 return;
             }
 
-            let html = `<div class="section-label">📋 Ваши группы</div>`;
+            let html = `<div class="section-label">👥 Ваши группы</div>`;
             groups.forEach(g => {
                 const name = g.group_name || `Группа ${g.group_id}`;
                 const avatarId = `avatar-group-${g.group_id}`;
-                const initial = getInitial(name);
-                html += `<div class="chat-card" onclick="loadChats(${g.group_id}, '${escHtml(name)}')">
-                            <div class="chat-card-main">
-                                <div class="avatar" id="${avatarId}">${initial}</div>
-                                <div class="chat-info">
-                                    <div class="chat-name">${escHtml(name)}</div>
-                                    <div class="chat-label">Нажмите, чтобы открыть чаты</div>
-                                </div>
-                                <div class="days-block">
-                                    <div class="days-number">›</div>
-                                </div>
-                            </div>
-                        </div>`;
+                html += `
+                <div class="group-card" onclick="loadChats(${g.group_id}, '${escHtml(name)}')">
+                    <div class="group-card-inner">
+                        <div class="avatar" id="${avatarId}">${getInitial(name)}</div>
+                        <div class="group-info">
+                            <div class="group-name">${escHtml(name)}</div>
+                            <div class="group-hint">Нажмите, чтобы открыть чаты</div>
+                        </div>
+                        <div class="group-chevron">›</div>
+                    </div>
+                </div>`;
             });
             document.getElementById('content').innerHTML = html;
-
             for (const g of groups) {
-                const avatarId = `avatar-group-${g.group_id}`;
-                loadAvatar(`/avatar/group/${g.group_id}`, avatarId);
+                loadAvatar(`/avatar/group/${g.group_id}`, `avatar-group-${g.group_id}`);
             }
         } catch (e) {
             if (!silent) showError('Не удалось загрузить группы');
-            console.error(e);
         }
     }
 
     async function loadChats(groupId, groupName, silent = false) {
         if (!silent) {
-            document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка чатов...</div>';
+            document.getElementById('content').innerHTML =
+                '<div class="loading"><div class="spinner"></div><div class="loading-text">Загружаем чаты...</div></div>';
             document.getElementById('back-btn').classList.add('visible');
             document.getElementById('header-sub').textContent = groupName;
         }
@@ -390,123 +493,112 @@
             const chats = await res.json();
 
             if (!chats.length) {
-                document.getElementById('content').innerHTML = `<div class="empty-state"><div class="empty-icon">🎈</div><div class="empty-title">Нет активных чатов</div><div class="empty-sub">Чаты появятся за 7 дней до дня рождения</div></div>`;
+                document.getElementById('content').innerHTML =
+                    `<div class="empty-state"><div class="empty-icon">🎈</div><div class="empty-title">Нет активных чатов</div><div class="empty-sub">Чаты появятся за 7 дней до дня рождения</div></div>`;
                 return;
             }
 
             let html = `<div class="section-label">🎯 Активные чаты</div>`;
 
-            for (let idx = 0; idx < chats.length; idx++) {
-                const chat = chats[idx];
+            for (const chat of chats) {
                 const isBirthdayBoy = (chat.birthday_user_id == userId);
-
+                const avatarId = `avatar-user-${chat.birthday_user_id}`;
                 let daysUntil = null;
 
                 if (chat.birthday_date) {
                     const clean = chat.birthday_date.replace('--', '');
                     const month = parseInt(clean.substring(0, 2), 10);
                     const day = parseInt(clean.substring(3, 5), 10);
-
                     const now = new Date();
                     const todayClean = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                    const currentYear = now.getFullYear();
-
-                    let birthday = new Date(currentYear, month - 1, day);
-
+                    let birthday = new Date(now.getFullYear(), month - 1, day);
                     if (birthday < todayClean) {
-                        birthday = new Date(currentYear + 1, month - 1, day);
-                    }
-
-                    const diffTime = birthday - todayClean;
-                    daysUntil = Math.round(diffTime / (1000 * 3600 * 24));
-
-                    if (daysUntil === 0 || (daysUntil < 0 && birthday.toDateString() === today.toDateString())) {
-                        daysUntil = 0;
+                        daysUntil = -Math.round((todayClean - birthday) / (1000 * 3600 * 24));
+                    } else {
+                        daysUntil = Math.round((birthday - todayClean) / (1000 * 3600 * 24));
                     }
                 } else {
                     const expiryDate = new Date(chat.expires_at);
                     const birthdayDate = new Date(expiryDate);
                     birthdayDate.setDate(birthdayDate.getDate() - 2);
-                    const diffTime = birthdayDate - new Date();
-                    daysUntil = Math.ceil(diffTime / (1000 * 3600 * 24));
+                    daysUntil = Math.ceil((birthdayDate - new Date()) / (1000 * 3600 * 24));
                 }
 
-                let status = 'upcoming';
-                let daysNumText = '';
-                let daysWord = '';
-                let avatarId = `avatar-user-${chat.birthday_user_id}`;
-                let initial = getInitial(chat.birthday_name);
-                let avatarUrl = `/avatar/user/${chat.birthday_user_id}`;
-                let cardClass = '';
-                let clickHandler = '';
-
-                if (isBirthdayBoy) {
-                    cardClass = 'disabled-chat';
-                    clickHandler = 'onclick="showSurpriseMessage()"';
-                } else {
-                    clickHandler = `onclick="window.location.href='chat.html?token=${encodeURIComponent(chat.chat_token)}&name=${encodeURIComponent(chat.birthday_name)}'"`;
-                }
-
-                if (daysUntil < 0) {
-                    status = 'past';
-                    daysNumText = '✓';
-                    daysWord = 'прошёл';
-                } else if (daysUntil === 0) {
-                    status = 'today';
-                    daysNumText = '🎉';
-                    daysWord = 'сегодня';
-                } else if (daysUntil === 1) {
-                    status = 'tomorrow';
-                    daysNumText = '⭐';
-                    daysWord = 'завтра';
-                } else {
-                    daysNumText = daysUntil;
-                    daysWord = formatDaysWord(daysUntil);
-                }
-
+                // Expires text
                 const expiryDate = new Date(chat.expires_at);
                 const localExpiry = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), expiryDate.getDate());
-                const today = new Date();
-                const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                let expiresDays = Math.round((localExpiry - localToday) / (1000 * 3600 * 24));
-                let expiresText = expiresDays > 0 ? `Чат закроется через ${expiresDays} ${formatDaysWord(expiresDays)}` : 'Чат скоро закроется';
+                const localToday = new Date(); localToday.setHours(0,0,0,0);
+                const expiresDays = Math.round((localExpiry - localToday) / (1000 * 3600 * 24));
+                const expiresText = expiresDays > 0
+                    ? `Закроется через ${expiresDays} ${formatDaysWord(expiresDays)}`
+                    : 'Закрывается скоро';
+
+                // Days display
+                let statusClass = '';
+                let daysNumHtml = '';
+                let daysLabelText = '';
+                let chatLabelText = '';
+                let footerAction = '';
+
+                if (isBirthdayBoy) {
+                    daysNumHtml = `<div class="days-number today">🎁</div>`;
+                    daysLabelText = '';
+                    chatLabelText = 'Чат скрыт';
+                    footerAction = '🔒 Недоступен';
+                } else if (daysUntil < 0) {
+                    // Прошедший — показываем "прошёл", а не цифру
+                    daysNumHtml = `<div class="days-number past">прошёл</div>`;
+                    daysLabelText = '';
+                    chatLabelText = 'День рождения прошёл';
+                    footerAction = '💬 Открыть чат →';
+                } else if (daysUntil === 0) {
+                    daysNumHtml = `<div class="days-number today">🎉</div>`;
+                    daysLabelText = 'сегодня';
+                    chatLabelText = 'До дня рождения:';
+                    footerAction = '💬 Открыть чат →';
+                } else if (daysUntil === 1) {
+                    daysNumHtml = `<div class="days-number tomorrow">1</div>`;
+                    daysLabelText = 'завтра';
+                    chatLabelText = 'До дня рождения:';
+                    footerAction = '💬 Открыть чат →';
+                } else {
+                    daysNumHtml = `<div class="days-number">${daysUntil}</div>`;
+                    daysLabelText = formatDaysWord(daysUntil);
+                    chatLabelText = 'До дня рождения:';
+                    footerAction = '💬 Открыть чат →';
+                }
+
+                const clickHandler = isBirthdayBoy
+                    ? `onclick="showToast('🎁 Тебе сейчас активно готовят сюрприз! Дождись своего дня 🎂')"`
+                    : `onclick="window.location.href='chat.html?token=${encodeURIComponent(chat.chat_token)}&name=${encodeURIComponent(chat.birthday_name)}'"`;
 
                 html += `
-                    <div class="chat-card ${cardClass}">
-                        <div class="chat-card-main" ${clickHandler}>
-                            <div class="avatar ${isBirthdayBoy ? 'disabled' : ''}" id="${avatarId}">${initial}</div>
-                            <div class="chat-info">
-                                <div class="chat-name">${escHtml(chat.birthday_name)}</div>
-                                <div class="chat-label">${isBirthdayBoy ? '🎁 Чат скрыт' : (status === 'past' ? 'День рождения прошёл' : 'До дня рождения:')}</div>
-                            </div>
-                            <div class="days-block">
-                                <div class="days-number ${status === 'past' ? 'past' : (status === 'today' ? 'today' : (status === 'tomorrow' ? 'tomorrow' : ''))}">
-                                    ${daysNumText}
-                                </div>
-                                <div class="days-label">${daysWord}</div>
-                            </div>
+                <div class="chat-card ${isBirthdayBoy ? 'disabled-chat' : ''}">
+                    <div class="chat-card-main" ${clickHandler}>
+                        <div class="avatar ${isBirthdayBoy ? 'greyed' : ''}" id="${avatarId}">${getInitial(chat.birthday_name)}</div>
+                        <div class="chat-info">
+                            <div class="chat-name">${escHtml(chat.birthday_name)}</div>
+                            <div class="chat-label">${chatLabelText}</div>
                         </div>
-                        <div class="chat-footer">
-                            <span>⏱️ ${expiresText}</span>
-                            <span>${isBirthdayBoy ? '🔒 Недоступен' : '💬 Открыть чат →'}</span>
+                        <div class="days-block">
+                            ${daysNumHtml}
+                            ${daysLabelText ? `<div class="days-label">${daysLabelText}</div>` : ''}
                         </div>
                     </div>
-                `;
+                    <div class="chat-footer">
+                        <span class="footer-expires">⏱ ${expiresText}</span>
+                        <span class="footer-action">${footerAction}</span>
+                    </div>
+                </div>`;
             }
-            document.getElementById('content').innerHTML = html;
 
+            document.getElementById('content').innerHTML = html;
             for (const chat of chats) {
-                const avatarId = `avatar-user-${chat.birthday_user_id}`;
-                loadAvatar(`/avatar/user/${chat.birthday_user_id}`, avatarId);
+                loadAvatar(`/avatar/user/${chat.birthday_user_id}`, `avatar-user-${chat.birthday_user_id}`);
             }
         } catch (e) {
             if (!silent) showError('Не удалось загрузить чаты');
-            console.error(e);
         }
-    }
-
-    function showSurpriseMessage() {
-        showToast('🎁 Эй! Тебе сейчас активно готовят сюрприз! Дождись дня рождения! 🎂');
     }
 
     function showGroups() { loadGroups(); }
