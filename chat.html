@@ -72,14 +72,11 @@
             border-radius: 12px;
             width: 38px; height: 38px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
             cursor: pointer;
-            color: var(--secondary);
             flex-shrink: 0;
             transition: transform 0.12s;
         }
         .header-btn:active { transform: scale(0.92); }
-        .revoke-btn { color: #d94f4f; font-size: 16px; }
 
         .header-info { flex: 1; min-width: 0; }
         .chat-title {
@@ -134,7 +131,6 @@
             opacity: 0;
             transition: opacity 0.2s;
             border: none;
-            font-size: 20px;
         }
         .scroll-down-btn.visible { opacity: 1; }
 
@@ -189,7 +185,7 @@
             color: var(--muted);
         }
         .message-own .message-meta { flex-direction: row-reverse; }
-        .check-icon { font-size: 10px; color: var(--muted); }
+        .check-icon { font-size: 10px; color: var(--muted); display: flex; align-items: center; }
 
         /* Image in message */
         .message-image {
@@ -260,7 +256,6 @@
             width: 42px; height: 42px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            font-size: 20px;
             flex-shrink: 0;
             transition: transform 0.12s;
         }
@@ -268,13 +263,13 @@
 
         .photo-btn {
             background: #fff;
-            color: var(--secondary);
             box-shadow: var(--shadow-card);
+            border-radius: 14px;
+            width: 42px; height: 42px;
         }
 
         .send-btn {
             background: var(--grad);
-            color: white;
             box-shadow: 0 6px 18px rgba(194,96,232,0.32);
         }
 
@@ -394,25 +389,102 @@
 <body>
 
 <div class="header">
-    <button class="header-btn" onclick="goBack()">←</button>
+    <!-- Back arrow: gradient chevron in rounded square -->
+    <button class="header-btn" onclick="goBack()" title="Назад">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.5 14L6.5 9L11.5 4" stroke="url(#grad-back-chat)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+                <linearGradient id="grad-back-chat" x1="6" y1="4" x2="12" y2="14" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#f76fa1"/>
+                    <stop offset="1" stop-color="#7b52f0"/>
+                </linearGradient>
+            </defs>
+        </svg>
+    </button>
+
     <div class="header-info">
         <div class="chat-title" id="chat-title">Загрузка...</div>
         <div class="chat-sub" id="chat-sub">Загрузка...</div>
     </div>
-    <button class="header-btn revoke-btn" onclick="revokeChat()" title="Закрыть чат">🔒</button>
-    <button class="header-btn" onclick="showParticipants()" title="Участники">👥</button>
+
+    <!-- Lock/revoke button -->
+    <button class="header-btn" onclick="revokeChat()" title="Закрыть чат" style="background:#fff3f3;">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect x="3" y="8" width="12" height="8" rx="2" fill="#d94f4f" fill-opacity="0.15" stroke="#d94f4f" stroke-width="1.5"/>
+            <path d="M6 8V6a3 3 0 1 1 6 0v2" stroke="#d94f4f" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+            <circle cx="9" cy="12" r="1.2" fill="#d94f4f"/>
+        </svg>
+    </button>
+
+    <!-- Participants button -->
+    <button class="header-btn" onclick="showParticipants()" title="Участники">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="7" cy="6" r="2.5" fill="url(#gp1)"/>
+            <circle cx="12.5" cy="6.5" r="2" fill="url(#gp2)" fill-opacity="0.8"/>
+            <path d="M2 14.5c0-2.49 2.24-4.5 5-4.5s5 2.01 5 4.5" stroke="url(#gp3)" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+            <path d="M12.5 10.5c1.93.27 3.5 1.73 3.5 4" stroke="url(#gp4)" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.7"/>
+            <defs>
+                <linearGradient id="gp1" x1="4.5" y1="3.5" x2="9.5" y2="8.5" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#f76fa1"/><stop offset="1" stop-color="#c260e8"/>
+                </linearGradient>
+                <linearGradient id="gp2" x1="10.5" y1="4.5" x2="14.5" y2="8.5" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#c260e8"/><stop offset="1" stop-color="#7b52f0"/>
+                </linearGradient>
+                <linearGradient id="gp3" x1="2" y1="10" x2="12" y2="14.5" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#f76fa1"/><stop offset="1" stop-color="#7b52f0"/>
+                </linearGradient>
+                <linearGradient id="gp4" x1="12" y1="10" x2="16" y2="14.5" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#c260e8"/><stop offset="1" stop-color="#7b52f0"/>
+                </linearGradient>
+            </defs>
+        </svg>
+    </button>
 </div>
 
 <div class="messages-container" id="messages-container">
     <div class="loading"><div class="spinner"></div><span>Загрузка сообщений...</span></div>
 </div>
 
-<button class="scroll-down-btn" id="scroll-down-btn" onclick="scrollToBottom()">↓</button>
+<!-- Scroll down button -->
+<button class="scroll-down-btn" id="scroll-down-btn" onclick="scrollToBottom()">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M4 7l5 5 5-5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+</button>
 
+<!-- INPUT AREA -->
 <div class="input-area">
-    <button class="icon-btn photo-btn" onclick="sendPhoto()">📷</button>
+    <!-- Photo button: camera SVG icon -->
+    <button class="icon-btn photo-btn" onclick="sendPhoto()" title="Фото">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M7.5 3.5L6.17 5H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3.17L12.5 3.5h-5Z" fill="url(#cam-bg)" stroke="none"/>
+            <circle cx="10" cy="10.5" r="2.8" fill="white" fill-opacity="0.95"/>
+            <circle cx="10" cy="10.5" r="1.6" fill="url(#cam-lens)"/>
+            <defs>
+                <linearGradient id="cam-bg" x1="2" y1="3" x2="18" y2="16" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#f76fa1"/><stop offset="1" stop-color="#7b52f0"/>
+                </linearGradient>
+                <linearGradient id="cam-lens" x1="7.5" y1="8" x2="12.5" y2="13" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#f76fa1"/><stop offset="1" stop-color="#7b52f0"/>
+                </linearGradient>
+            </defs>
+        </svg>
+    </button>
+
     <input class="input-field" type="text" id="message-input" placeholder="Напишите сообщение...">
-    <button class="icon-btn send-btn" onclick="sendMessage()">➤</button>
+
+    <!-- Send button: paper plane SVG -->
+    <button class="icon-btn send-btn" onclick="sendMessage()" title="Отправить">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M17.5 2.5L2 8.5l6 2.5 2.5 6L17.5 2.5Z" fill="white" fill-opacity="0.95"/>
+            <path d="M8 11l4-4" stroke="url(#send-line)" stroke-width="1.5" stroke-linecap="round"/>
+            <defs>
+                <linearGradient id="send-line" x1="8" y1="11" x2="12" y2="7" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#f76fa1" stop-opacity="0.4"/><stop offset="1" stop-color="#7b52f0" stop-opacity="0.4"/>
+                </linearGradient>
+            </defs>
+        </svg>
+    </button>
 </div>
 
 <!-- Participants sheet -->
@@ -465,7 +537,7 @@
     }
 
     if (birthdayName) {
-        document.getElementById('chat-title').textContent = `🎂 ${decodeURIComponent(birthdayName)}`;
+        document.getElementById('chat-title').textContent = decodeURIComponent(birthdayName);
         document.getElementById('chat-sub').textContent = 'Планируем поздравление';
     } else {
         document.getElementById('chat-title').textContent = 'Чат планирования';
@@ -520,6 +592,9 @@
     function escapeHtml(str) {
         return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
+
+    // SVG double checkmark for own messages
+    const checkSvg = `<svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M1 5l3 3 5-7" stroke="#9490a8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 5l3 3 5-7" stroke="#9490a8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
     let lastDateShown = '';
 
@@ -576,7 +651,7 @@
                     <div class="message-bubble">${messageContent}</div>
                     <div class="message-meta">
                         <span class="message-time">${localTime}</span>
-                        ${isOwn ? '<span class="check-icon">✓✓</span>' : ''}
+                        ${isOwn ? `<span class="check-icon">${checkSvg}</span>` : ''}
                     </div>
                 </div>`;
             }
